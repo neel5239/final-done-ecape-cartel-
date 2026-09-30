@@ -1,0 +1,3 @@
+# Railway (Railpack) serves this folder as a static site with Caddy.
+# Multi-page site: no SPA fallback, each .html page is its own route.
+root: .

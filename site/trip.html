@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- js/trip.js rewrites title, description and OG tags for the chosen trip -->
+  <title>Trip details, itinerary and dates | Escape Cartel</title>
+  <meta name="description" content="Day-by-day itinerary, inclusions, dates and flexible booking options for an Escape Cartel small-group trip in India.">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Escape Cartel">
+  <meta property="og:title" content="Trip details | Escape Cartel">
+  <meta property="og:description" content="Itinerary, inclusions and flexible dates for a small-group trip across India.">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Snow-covered Himalayan ridges seen from Kedarkantha summit in Uttarakhand">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
+  <link rel="preload" href="vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+  <link rel="stylesheet" href="css/bg.css">
+  <link rel="stylesheet" href="css/trip-itinerary.css">
+  <!-- Group-trip cards (.it-card) for the "Group trips open to join" row -->
+  <link rel="stylesheet" href="css/itinerary.css">
+</head>
+<body data-no-bottombar>
+  <div data-include="header"></div>
+
+  <main id="main">
+    <!-- Image reason: FULL-BLEED hero. The landscape at full phone height sells
+         the scale of the place before any words; name sits on a bottom scrim. -->
+    <section class="trip-hero" data-theme="dark" id="hero" aria-labelledby="trip-name" data-image-reason="Full-bleed for scale">
+      <img class="trip-hero__img" id="hero-img" alt="" width="1600" height="1000" fetchpriority="high" decoding="async">
+      <div class="container trip-hero__inner">
+        <span class="eyebrow" id="trip-loc" style="color:var(--chalk-line)">Trip</span>
+        <h1 id="trip-name">Loading trip…</h1>
+        <p class="lead" id="trip-tagline"></p>
+        <div class="trip-hero__badges" id="trip-badges"></div>
+        <div class="trip-hero__actions" id="hero-actions">
+          <a class="btn btn--primary btn--lg" href="#itin-title"><span class="btn__label">View itinerary</span></a>
+          <a class="btn btn--liquid-fill" id="customise-link" href="plan.html"><span class="btn__label">Customise this trip</span></a>
+          <button class="btn-heart" type="button" id="hero-heart" aria-pressed="false" aria-label="Save to wishlist" data-wishlist-id="">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.8-4.6-7.8-10.4A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 7.8 2.7c0 5.8-7.8 10.4-7.8 10.4Z" stroke-linejoin="round"/></svg>
+          </button>
+          <label class="chip chip--toggle">
+            <input type="checkbox" id="hero-compare" data-compare-id="">
+            <svg class="chip__tick" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            <span>Compare</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Day-by-day timeline: filled by js/trip-itinerary.js from js/trip-itinerary-data.js (removed if the trip is unknown) -->
+    <section class="section tl" id="trip-itinerary" data-theme="dark" aria-labelledby="itin-title" hidden>
+      <div class="container">
+        <div class="tl__head"><h2 class="tl__title" id="itin-title">About the trip</h2></div>
+        <div class="tl__grid">
+          <div class="tl__story">
+            <p id="tl-intro"></p>
+            <p class="tl__covers" id="tl-covers"></p>
+            <p>Routes, stays and transfers are planned for you. We show where to go, what to see and where to eat, so you can simply <span class="tl__enjoy">enjoy the escape</span>.</p>
+            <p class="tl__eyebrow">Key facts</p>
+            <dl class="tl__facts" id="tl-facts"></dl>
+          </div>
+          <ol class="tl__days" id="tl-days" role="list" aria-label="Day by day plan"></ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-theme="light" id="trip-body" aria-label="Trip details">
+      <div class="container trip-layout">
+        <div class="trip-main">
+          <section aria-labelledby="facts-title">
+            <h2 id="facts-title">Quick facts</h2>
+            <dl class="facts" id="facts"></dl>
+          </section>
+
+          <!-- Legacy accordion: kept hidden because js/trip.js still fills it; the timeline above replaces it. -->
+          <section aria-labelledby="itin-legacy-title" hidden>
+            <div class="itin-tools">
+              <h2 id="itin-legacy-title">Day by day</h2>
+              <button class="link-swap" type="button" id="itin-all" aria-controls="itinerary">Open all days</button>
+            </div>
+            <ol class="itinerary" id="itinerary" role="list"></ol>
+          </section>
+
+          <section aria-labelledby="incl-title">
+            <h2 id="incl-title">Sample inclusions</h2>
+            <!-- TODO(owner): replace sample itinerary and inclusion lists with confirmed trip details. -->
+            <div class="incl">
+              <div><h3>Included</h3><ul id="incl-in" role="list"></ul></div>
+              <div class="incl--out"><h3>Not included</h3><ul id="incl-out" role="list"></ul></div>
+            </div>
+          </section>
+
+          <section aria-labelledby="gallery-title">
+            <h2 id="gallery-title">Gallery</h2>
+            <div class="gallery" id="gallery"></div>
+          </section>
+
+          <!-- TODO(owner): confirm every flexibility term in data.js FLEX_POLICY
+               ('[to confirm]' values: change window, transfer cut-off,
+               private-trip minimum). Visitors only see the neutral display copy. -->
+          <section class="flex-box ink-panel" aria-labelledby="flex-title">
+            <span class="eyebrow">Your plans can change</span>
+            <h2 id="flex-title">Book now, stay flexible</h2>
+            <ul class="flex-list" id="flex-list" role="list"></ul>
+            <div class="cluster">
+              <a class="link-swap" href="terms.html">Read the booking terms</a>
+            </div>
+          </section>
+
+          <section aria-labelledby="faq-title">
+            <h2 id="faq-title">Questions</h2>
+            <div class="faq" id="faq"></div>
+          </section>
+
+          <section class="enquiry ink-panel" id="enquiry" aria-labelledby="enquiry-title">
+            <h2 id="enquiry-title">Hold a spot or ask anything</h2>
+            <p>Tell us your dates and group. We reply on WhatsApp with the confirmed price, and nothing is charged until you say yes.</p>
+            <form class="form-grid form-grid--2" id="enquiry-form" novalidate>
+              <input type="hidden" name="trip" id="f-trip" value="">
+              <div class="field">
+                <label for="e-name">Your name</label>
+                <input class="input" id="e-name" name="name" autocomplete="name" required maxlength="80">
+                <p class="field-error" data-error-for="name" hidden></p>
+              </div>
+              <div class="field">
+                <label for="e-phone">WhatsApp number</label>
+                <input class="input" id="e-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="98765 43210">
+                <p class="field-error" data-error-for="phone" hidden></p>
+              </div>
+              <div class="field">
+                <label for="e-dates">Preferred batch</label>
+                <select class="select" id="e-dates" name="dates"></select>
+              </div>
+              <div class="field">
+                <label for="e-group">Travellers</label>
+                <select class="select" id="e-group" name="groupSize"></select>
+              </div>
+              <div class="field">
+                <label for="e-email">Email <span class="field-hint">(optional)</span></label>
+                <input class="input" id="e-email" name="email" type="email" autocomplete="email" maxlength="120">
+                <p class="field-error" data-error-for="email" hidden></p>
+              </div>
+              <div class="field">
+                <label for="e-city">City <span class="field-hint">(optional)</span></label>
+                <input class="input" id="e-city" name="city" autocomplete="address-level2" maxlength="60">
+              </div>
+              <div class="field field--full">
+                <label for="e-msg">Anything we should know? <span class="field-hint">(optional)</span></label>
+                <textarea class="textarea" id="e-msg" name="message" maxlength="600" placeholder="Dietary needs, a friend joining later, a different start city…"></textarea>
+                <p class="field-error" data-error-for="message" hidden></p>
+              </div>
+              <div class="hp" aria-hidden="true">
+                <label for="e-web">Leave this empty</label>
+                <input id="e-web" name="website" tabindex="-1" autocomplete="off">
+              </div>
+              <div class="form-foot field--full">
+                <button class="btn btn--submit btn--lg btn--block" type="submit" data-success-text="Opening WhatsApp">Send enquiry on WhatsApp</button>
+                <div class="form-status" data-form-status role="status" aria-live="polite"></div>
+                <p class="form-note">Your details open in WhatsApp as a message to 98257 44110. You can edit it before sending.</p>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <aside class="trip-aside" aria-label="Booking summary">
+          <div class="book-card ink-panel" id="book-card"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" data-theme="dark" id="related-wrap" aria-labelledby="related-title">
+      <div class="container">
+        <h2 id="related-title" style="margin-bottom:var(--space-5)">Group trips open to join</h2>
+        <ul class="it-grid" id="related" role="list"></ul>
+        <div class="cluster" style="margin-top:var(--space-5)">
+          <a class="btn btn--liquid-fill" href="/trips"><span class="btn__label">See all trips</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile booking bar (desktop uses the sticky card) -->
+  <div class="trip-bar" id="trip-bar" role="region" aria-label="Book this trip" data-theme="dark">
+    <p class="price" id="bar-price"></p>
+    <a class="btn btn--gooey" href="#enquiry"><span class="btn__label">Enquire</span></a>
+  </div>
+
+  <div id="compare-tray" hidden></div>
+  <dialog class="dialog" id="compare-dialog" aria-labelledby="compare-title" data-theme="light">
+    <div class="dialog__head">
+      <h2 id="compare-title">Compare trips</h2>
+      <button class="btn btn--icon btn--sm btn--ripple" type="button" data-close aria-label="Close comparison">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="dialog__body" data-compare-body></div>
+  </dialog>
+
+  <dialog class="lightbox" id="lightbox" aria-label="Photo viewer" data-theme="dark">
+    <div class="lightbox__head">
+      <p class="lightbox__cap" id="lb-cap"></p>
+      <button class="btn btn--icon btn--sm btn--ripple" type="button" data-close aria-label="Close photo viewer">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="lightbox__stage" id="lb-stage"><img id="lb-img" alt=""></div>
+    <div class="lightbox__foot">
+      <button class="btn btn--icon btn--arrow btn--prev" type="button" id="lb-prev" aria-label="Previous photo"><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <span class="lightbox__count" id="lb-count" aria-live="polite"></span>
+      <button class="btn btn--icon btn--arrow" type="button" id="lb-next" aria-label="Next photo"><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+    </div>
+  </dialog>
+
+  <div data-include="footer"></div>
+
+  <script src="js/core.js" defer></script>
+  <script src="js/buttons.js" defer></script>
+  <script type="module" src="js/trip.js"></script>
+  <script type="module" src="js/trip-itinerary.js"></script>
+  <script type="module" src="js/fx.js"></script>
+</body>
+</html>

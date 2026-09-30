@@ -1,0 +1,163 @@
+/* ==========================================================================
+   Escape Cartel — design tokens
+   Direction: "Night Pass" — ink / chalk / ash / fog.
+   The client's logo is a white brush-script emblem on pure black, so the whole
+   system is strictly neutral: no chromatic accent anywhere. Hierarchy comes
+   from contrast, weight, scale and motion instead of colour.
+   Hex values are the exact palette recorded in research/logo.md.
+   ========================================================================== */
+
+:root {
+  /* ---- Raw palette (from the logo, never use a hue) ---------------------- */
+  --ink: #000000;          /* logo ground, primary dark background */
+  --ink-raised: #141414;   /* cards / panels on dark */
+  --ink-line: #333333;     /* hairlines + borders on dark */
+  --ash: #a3a3a3;          /* muted text on dark (7.9:1 on ink) */
+  --fog: #808080;          /* mid grey: disabled, dividers, never body text */
+  --chalk-line: #e5e5e5;   /* hairlines + borders on light */
+  --chalk-soft: #f5f5f5;   /* secondary light surface */
+  --chalk: #ffffff;        /* logo stroke, primary light background */
+  /* Derived greys for states — mixed from the palette, still hue-free */
+  --ink-hover: #1f1f1f;    /* hover lift on dark surfaces */
+  --graphite: #595959;     /* muted text on light (7:1 on chalk) */
+  --chalk-hover: #ebebeb;  /* hover dip on light surfaces */
+
+  /* ---- Glass over the scene ---------------------------------------------
+     A fixed WebGL landscape (#bg-canvas) runs behind every page and lightens
+     from night to golden hour as you scroll. Nothing may depend on what it
+     shows, so content sits on near-black glass. Contrast is budgeted for the
+     worst case (pure white behind the glass):
+       section scrim 0.70 -> white text >= 9:1, --mist text >= 4.7:1
+       cards add a second 0.66 layer on top, so cards are always darker. */
+  --mist: #c4c4c4;                         /* muted text on glass (replaces ash for copy) */
+  --glass-section: rgba(0, 0, 0, 0.7);     /* every section band */
+  --glass: rgba(12, 12, 12, 0.66);         /* cards, panels, forms */
+  --glass-strong: rgba(6, 6, 6, 0.82);     /* chrome: header, bars, tray; also no-blur fallback */
+  --glass-blur: 12px;
+  --glass-line: rgba(255, 255, 255, 0.14); /* hairline that shows on any backdrop */
+
+  /* ---- Semantic roles ----------------------------------------------------
+     Every component reads these, never the raw palette. There is one ground
+     now (dark glass); data-theme="light" is kept as an alias so page markup
+     does not change, and resolves to the same dark roles (see below).
+     --bg stays SOLID ink: it is used as a text/fill colour (inputs, flooded
+     buttons, focus halo), while section backgrounds use --glass-section. */
+  --bg: var(--ink);
+  --surface: var(--glass);
+  --surface-hover: rgba(36, 36, 36, 0.76);
+  --fg: var(--chalk);
+  --fg-muted: var(--mist);
+  --line: var(--glass-line);
+  --line-strong: rgba(255, 255, 255, 0.5); /* input borders: >= 3:1 on glass */
+  --inverse-bg: var(--chalk);   /* the "solid" fill used by primary buttons */
+  --inverse-fg: var(--ink);
+  --focus-ring: var(--chalk);
+  --focus-halo: var(--ink);     /* 2-tone ring: visible on any photo */
+  --scrim: rgba(0, 0, 0, 0.72); /* overlays on photography */
+  color-scheme: dark;
+
+  /* ---- Type ----------------------------------------------------------------
+     Bricolage Grotesque (display): optical-size axis makes huge headings
+     tighten like signage, a grotesque with a hand-cut edge that sits beside
+     the brush-script logo without imitating it.
+     Manrope (body): open apertures, very legible on small Android screens. */
+  --font-display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --font-body: "Manrope", "Segoe UI", Arial, sans-serif;
+
+  /* One fluid scale, ratio ~1.25 on mobile growing to ~1.333 at 1440px */
+  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.875rem);   /* captions, meta */
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);      /* body */
+  --step-1: clamp(1.2rem, 1.12rem + 0.4vw, 1.5rem);      /* lead, card title */
+  --step-2: clamp(1.44rem, 1.28rem + 0.8vw, 2rem);       /* h3 */
+  --step-3: clamp(1.73rem, 1.44rem + 1.45vw, 2.66rem);   /* h2 small */
+  --step-4: clamp(2.07rem, 1.58rem + 2.45vw, 3.55rem);   /* h2 */
+  --step-5: clamp(2.49rem, 1.66rem + 4.15vw, 4.73rem);   /* h1 */
+  --step-6: clamp(2.99rem, 1.6rem + 6.9vw, 6.3rem);      /* hero display */
+
+  --lh-tight: 1.02;
+  --lh-snug: 1.2;
+  --lh-body: 1.6;
+  --tracking-display: -0.03em;
+  --tracking-caps: 0.14em;
+
+  /* ---- Space: 8px rhythm ------------------------------------------------ */
+  --space-0: 0.25rem;  /* 4  — hairline gaps only */
+  --space-1: 0.5rem;   /* 8  */
+  --space-2: 1rem;     /* 16 */
+  --space-3: 1.5rem;   /* 24 */
+  --space-4: 2rem;     /* 32 */
+  --space-5: 3rem;     /* 48 */
+  --space-6: 4rem;     /* 64 */
+  --space-7: 6rem;     /* 96 */
+  --space-8: 8rem;     /* 128 */
+  --section-pad: clamp(var(--space-6), 7vw, var(--space-7));
+  --gutter: clamp(var(--space-2), 4vw, var(--space-5));
+  --container: 76rem;       /* 1216px content width */
+  --container-narrow: 46rem;
+
+  /* ---- Radii: rule = pills for anything you press, 8/16/24 for surfaces.
+     Nested radii stay concentric: inner = outer - padding. ---------------- */
+  --radius-xs: 0.5rem;   /* 8  inputs, tags */
+  --radius-sm: 1rem;     /* 16 inner media */
+  --radius-md: 1.5rem;   /* 24 cards, panels */
+  --radius-lg: 2rem;     /* 32 big feature panels */
+  --radius-pill: 999px;  /* all buttons + chips (echoes the round emblem) */
+
+  /* ---- Motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);        /* entrances, settles */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);   /* liquid swells */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* pops (heart, chip) */
+  --ease-press: cubic-bezier(0.2, 0, 0, 1);         /* instant press-down */
+  --dur-instant: 90ms;
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 550ms;
+  --dur-liquid: 650ms;
+
+  /* ---- Elevation: this system separates with hairlines + tone, not shadow.
+     One soft shadow exists only for things that float over content. ------- */
+  --shadow-float: 0 12px 32px -8px rgba(0, 0, 0, 0.55);
+
+  /* ---- Layers ------------------------------------------------------------ */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-sticky: 100;     /* header */
+  --z-bottombar: 150;  /* mobile Plan my trip bar */
+  --z-fab: 160;        /* floating WhatsApp */
+  --z-drawer: 200;     /* mobile nav */
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-skip: 1000;
+
+  /* ---- Layout constants --------------------------------------------------- */
+  --header-h: 5rem;        /* 80px: room for a 64px emblem */
+  --bottombar-h: 4.5rem;   /* 72px incl. padding; mobile only */
+  --tap: 2.75rem;          /* 44px minimum tap target */
+}
+
+/* Both theme names resolve to the dark-glass roles. The old light ground
+   (white sections) would turn into a pale sheet over the golden-hour scene,
+   and the header flipped to white over it; both are retired. Individual
+   components that need a white fill (e.g. the solid flexibility card) set
+   their own local roles. */
+[data-theme="light"],
+[data-theme="dark"] {
+  --bg: var(--ink);
+  --surface: var(--glass);
+  --surface-hover: rgba(36, 36, 36, 0.76);
+  --fg: var(--chalk);
+  --fg-muted: var(--mist);
+  --line: var(--glass-line);
+  --line-strong: rgba(255, 255, 255, 0.5);
+  --inverse-bg: var(--chalk);
+  --inverse-fg: var(--ink);
+  --focus-ring: var(--chalk);
+  --focus-halo: var(--ink);
+  --scrim: rgba(0, 0, 0, 0.72);
+  color-scheme: dark;
+}
+
+/* Users who ask for less transparency get solid panels. */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass-section: rgba(0, 0, 0, 0.9); --glass: #121212; --glass-strong: #080808; }
+}

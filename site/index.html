@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Escape Cartel | Student group trips from Manipal University Jaipur</title>
+  <meta name="description" content="Browse ready student group trips from Manipal University Jaipur or plan a private trip for your friends. Fixed pickups at Sundar One hostel gate and the college gate.">
+  <!-- TODO(owner): once the domain is live, add <link rel="canonical"> and make og:image an absolute URL. -->
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Escape Cartel">
+  <meta property="og:title" content="Escape Cartel | Student group trips from Manipal University Jaipur">
+  <meta property="og:description" content="Browse student group trips with clear budgets, open seats and two fixed campus pickup points.">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Snow-covered Himalayan ridges seen from Kedarkantha summit in Uttarakhand">
+  <meta property="og:locale" content="en_IN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Escape Cartel | Student group trips from Manipal University Jaipur">
+  <meta name="twitter:description" content="Student group trips from Manipal University Jaipur. Browse a ready trip or plan a private one.">
+  <meta name="twitter:image" content="assets/images/og-image.jpg">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
+  <link rel="preload" href="vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/images/hero/hero-mountains.jpg" as="image" fetchpriority="high">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/home.css">
+  <!-- Marks JS as available so the hero headline can wait for its split reveal (CSS has a 2.5s failsafe). -->
+  <script>document.documentElement.classList.add('js');</script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TravelAgency",
+    "name": "Escape Cartel",
+    "description": "Student group trips from Manipal University Jaipur, with fixed pickup points and clear budgets.",
+    "telephone": "+91-98257-44110",
+    "logo": "assets/images/logo/logo-black.png",
+    "areaServed": "IN"
+  }
+  </script>
+  <link rel="stylesheet" href="css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+  <link rel="stylesheet" href="css/bg.css">
+</head>
+<body class="home">
+  <div data-include="header"></div>
+
+  <main id="main">
+
+    <!-- ================================================================
+         1. HERO
+         Z-order: the fixed WebGL journey sits behind a translucent real
+         Kedarkantha photo, followed by the departure card, scrim and copy.
+         Image reason: full-bleed for scale; the photograph keeps the place
+         recognisable while live ridges add depth beneath it.
+         ================================================================ -->
+    <section class="hero" id="hero" data-theme="dark" aria-labelledby="hero-title">
+      <img class="hero__poster" src="assets/images/hero/hero-mountains.jpg" alt="Snow-covered Himalayan ridges under a cloudy sky, seen from the Kedarkantha summit in Uttarakhand" width="1920" height="1080" fetchpriority="high" decoding="async" data-reason="Full-bleed for scale: range after range tells you how far a trip can take you.">
+      <p class="hero__ghost par" aria-hidden="true">Escape</p>
+
+      <aside class="hero-card par" aria-label="Next departure">
+        <p class="hero-card__eyebrow">Next student group</p>
+        <p class="hero-card__trip" data-next-trip>Next student group</p>
+        <p class="hero-card__meta" data-next-meta>Dates and availability on request</p>
+        <div class="hero-card__seats" data-next-seats hidden>
+          <span class="spots__row"><span data-next-left></span><span data-next-filled></span></span>
+          <span class="spots__bar" aria-hidden="true"><i data-next-fill></i></span>
+        </div>
+        <a class="btn btn--primary btn--sm btn--ripple hero-card__cta" href="trips.html" data-next-link><span class="btn__label">View itinerary</span></a>
+      </aside>
+
+      <canvas class="hero__scene" id="hero-scene" aria-hidden="true"></canvas>
+      <div class="hero__scrim" aria-hidden="true"></div>
+
+      <!-- Shown only while the WebGL scene runs (see home.css). -->
+      <p class="hero__hint" aria-hidden="true"><span class="hero__hint-fine">Move to light the ridges · click to survey</span><span class="hero__hint-touch">Tap the mountains to survey</span></p>
+
+      <div class="container hero__copy">
+        <h1 class="hero__title" id="hero-title" data-split>Student group trips from Manipal University Jaipur</h1>
+        <p class="hero__sub" data-hero-fade>Join a ready trip at a fixed budget per person, or plan a private trip for your friends. Pickup at Sundar One hostel gate or the college gate.</p>
+        <div class="hero__ctas" data-hero-fade>
+          <a class="btn btn--gooey btn--lg" href="trips.html"><span class="btn__label">Browse trips</span></a>
+          <a class="btn btn--liquid-fill btn--lg" href="plan.html"><span class="btn__label">Plan my trip</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- task: group-trip stats + upcoming groups ================================
+         2. STATS. Every number is computed in js/home.js from store.getTrips()
+         (seed groups in js/data.js GROUP_TRIPS are demo data).
+         TODO(owner): travellers hosted and reviews are not shown until verified.
+         ================================================================ -->
+    <section class="stats" data-theme="dark" aria-label="Group trips in numbers">
+      <div class="container">
+        <dl class="stats__row">
+          <div class="stat" data-reveal><dt>Open student groups</dt><dd class="num" data-gstat="groups">6</dd></div>
+          <div class="stat" data-reveal><dt>Seats still open</dt><dd class="num" data-gstat="seats">37</dd></div>
+          <div class="stat" data-reveal><dt>Ways to travel: ready trips or private</dt><dd class="num">2</dd></div>
+          <div class="stat" data-reveal><dt>Fixed pickup points</dt><dd class="num" data-gstat="pickups">2</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- UPCOMING GROUPS: top 3 open groups by date, rendered by js/home.js. -->
+    <section class="section groups" id="groups" data-theme="dark" aria-labelledby="groups-title">
+      <div class="container">
+        <div class="groups__head">
+          <div>
+            <p class="eyebrow">From your campus · filling now</p>
+            <h2 id="groups-title" tabindex="-1">Upcoming groups. Grab a seat before it goes.</h2>
+            <p class="groups__pickup"><strong>Pickup &amp; drop</strong> <span>Sundar One hostel gate or the college gate</span></p>
+          </div>
+          <a class="btn btn--primary btn--ripple btn--arrow" href="trips.html"><span class="btn__label">See every trip</span><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+        </div>
+        <ul class="group-grid" role="list" data-group-grid aria-live="polite">
+          <!-- cards injected by js/home.js -->
+        </ul>
+        <noscript><p><a href="trips.html">See upcoming group trips</a></p></noscript>
+      </div>
+    </section>
+    <!-- /task -->
+
+    <!-- ================================================================
+         3. TRIPS PREVIEW (rendered from js/data.js by js/home.js)
+         Image reason: 16:10 rounded rectangle, the same frame as the
+         upcoming-group cards, so the whole scene (people, landmark) stays in.
+         ================================================================ -->
+    <section class="section trips" id="trips" data-theme="light" aria-labelledby="trips-title">
+      <div class="container">
+        <div class="trips__head">
+          <div>
+            <p class="eyebrow">More campus groups</p>
+            <h2 id="trips-title">Find your group. See the budget before you join.</h2>
+          </div>
+        </div>
+
+        <form class="trips__advanced" data-home-filters aria-label="Filter open groups">
+          <label><span>Destination</span><select name="destination"><option value="">Anywhere</option></select></label>
+          <label><span>Month</span><select name="month"><option value="">Any month</option></select></label>
+        </form>
+        <p class="small muted trips__filter-note">Open a trip to read the full day-by-day itinerary, then join if the budget per person works for you. Payment is in demo mode for now; Neel confirms your seat on WhatsApp.</p>
+
+        <ul class="trip-grid" role="list" data-trip-grid aria-live="polite">
+          <!-- cards injected by js/home.js -->
+        </ul>
+        <noscript><p><a href="trips.html">See all trips</a></p></noscript>
+
+        <div class="trips__more" data-reveal>
+          <p><strong data-more-count>Open groups</strong> <span class="muted" data-more-list></span></p>
+          <a class="btn btn--primary btn--ripple btn--arrow" href="trips.html"><span class="btn__label">See all trips</span><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section flex" id="flexibility" data-theme="dark" aria-labelledby="flex-title">
+      <div class="container">
+        <div class="flex__head">
+          <h2 id="flex-title">A clear way to join.</h2>
+          <p class="lead">Choose an open group, see the date and full budget per person, then select one of two fixed pickup points.</p>
+        </div>
+        <ul class="flex-grid" role="list">
+          <li class="flex-card" data-reveal><span class="flex-card__num num" aria-hidden="true">01</span><h3>Pick a trip, read every day</h3><p>Each trip shows its date, price per person, seats left and a day-by-day plan with places, activities and stays.</p></li>
+          <li class="flex-card" data-reveal><span class="flex-card__num num" aria-hidden="true">02</span><h3>Choose your pickup</h3><p>Sundar One hostel gate or the college gate. You are dropped back at the same point.</p></li>
+          <li class="flex-card" data-reveal><span class="flex-card__num num" aria-hidden="true">03</span><h3>Confirm the budget &amp; join</h3><p>Join from the end of the itinerary, only if the full price per person works for you.</p></li>
+          <li class="flex-card" data-reveal><span class="flex-card__num num" aria-hidden="true">04</span><h3>Pay &amp; travel</h3><p>Payment runs in demo mode for now. Neel confirms your seat on WhatsApp.</p></li>
+          <li class="flex-card flex-card--wide flex-card--solid" data-reveal><span class="flex-card__num num" aria-hidden="true">05</span><h3>Travelling as a private group?</h3><p>Tell us your destination, dates, budget and group size, and we plan a private trip around your crew.</p><a class="btn btn--gooey" href="plan.html"><span class="btn__label">Plan my trip</span></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- task: how it works (4 steps) + create CTA + Sundar One perk ============
+         5. HOW IT WORKS
+         ================================================================ -->
+    <section class="section how" data-theme="light" aria-labelledby="how-title">
+      <div class="container">
+        <p class="eyebrow">How a group trip works</p>
+        <h2 id="how-title">Four steps from hostel gate to trip.</h2>
+        <ol class="how__steps how__steps--four" role="list">
+          <li class="how-step" data-reveal>
+            <span class="how-step__num num" aria-hidden="true">1</span>
+            <h3>Pick a trip, read every day</h3>
+            <p>Browse trips already planned for students, then read the full day-by-day plan with places, activities and stays before you decide.</p>
+            <a class="link-swap" href="/trips">Browse trips</a>
+          </li>
+          <li class="how-step" data-reveal>
+            <span class="how-step__num num" aria-hidden="true">2</span>
+            <h3>Choose your pickup</h3>
+            <p>Two fixed points only: <strong>Sundar One hostel gate</strong> or the <strong>college gate</strong>. No hunting for the bus.</p>
+          </li>
+          <li class="how-step" data-reveal>
+            <span class="how-step__num num" aria-hidden="true">3</span>
+            <h3>Confirm the budget &amp; join</h3>
+            <p>Each trip shows one price per person. If it works for you, confirm it and join from the end of the itinerary.</p>
+          </li>
+          <li class="how-step" data-reveal>
+            <span class="how-step__num num" aria-hidden="true">4</span>
+            <h3>Pay &amp; travel</h3>
+            <p>Payment runs in demo mode for now. Neel confirms your seat on WhatsApp, and after the trip we drop you back at the same pickup point.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- CREATE YOUR OWN TRIP + SUNDAR ONE PERK.
+         TODO(owner): add the Sundar One perk details (discount, address) only once confirmed. -->
+    <section class="section create-cta" data-theme="dark" aria-labelledby="create-title">
+      <div class="container create-cta__grid">
+        <div class="create-cta__panel" data-reveal>
+          <p class="eyebrow">Your plan, your crew</p>
+          <h2 id="create-title">No trip going where you want? Plan a private one.</h2>
+          <p>Share the destination, dates, budget and group size. We build a private trip for your friends and come back with a plan.</p>
+          <div class="create-cta__actions">
+            <a class="btn btn--primary btn--lg btn--ripple" href="plan.html"><span class="btn__label">Plan my trip</span></a>
+            <a class="btn btn--ghost btn--lg" href="trips.html"><span class="btn__label">Browse trips first</span></a>
+          </div>
+        </div>
+        <aside class="perk" data-reveal aria-labelledby="perk-title">
+          <p class="perk__badge">Sundar One hostel</p>
+          <h3 id="perk-title">Pickup right at your hostel gate.</h3>
+          <p>Staying at Sundar One? Pick the hostel gate when you join and walk out to the bus. Drop back at the same gate.</p>
+          <!-- open trips that start at the Sundar One gate: filled by js/home.js -->
+          <ul class="perk__trips" role="list" aria-label="Trips with Sundar One pickup" data-perk-trips></ul>
+          <a class="link-swap" href="/trips#group-trips">See every group trip</a>
+        </aside>
+      </div>
+    </section>
+    <!-- /task -->
+
+    <!-- ================================================================
+         6. DESTINATION MOSAIC: only places that have a planned student group
+         (js/data.js GROUP_TRIPS). Each crop has one job:
+         - Amer Fort: LARGE, the one-day trip closest to campus
+         - rishikesh-river: CORNER INSET, a close detail over the big view
+         - kedarkantha-summit-sunrise: SEMICIRCLE, the sunrise arc
+         - jaisalmer-camel-riders-editorial: tall strip, the scale of the dunes
+         - lake-city: wide band, the long lake horizon of Udaipur
+         ================================================================ -->
+    <section class="section mosaic" data-theme="dark" aria-labelledby="mosaic-title">
+      <div class="container mosaic__head">
+        <h2 id="mosaic-title">From the campus gate to the snowline.</h2>
+        <p class="lead">Forts, lakes and dunes across Rajasthan, the Ganga at Rishikesh and a Kedarkantha snow trek. Every place here has a student group planned from campus.</p>
+      </div>
+      <div class="mosaic__grid">
+        <a class="tile tile--large" href="/itinerary?trip=g01"data-cursor="Jaipur" data-reason="Large, corner-anchored: the fort nearest campus, and the easiest first trip.">
+          <img src="assets/images/trip-jaipur-amer-fort.jpg" alt="Amer Fort on its hillside above Maota Lake near Jaipur, walls reflected in the water at sunset" width="1280" height="800" loading="lazy" decoding="async">
+          <span class="tile__cap">Jaipur · Amer &amp; Nahargarh</span>
+        </a>
+        <a class="tile tile--inset" href="/itinerary?trip=g06"data-cursor="Rishikesh" data-reason="Corner inset: a close detail laid over the big view, like a photo tucked into a map.">
+          <img src="assets/images/places/rishikesh-river.jpg" alt="Two rafters paddling the Ganga through a rocky gorge near Rishikesh" width="1600" height="1067" loading="lazy" decoding="async">
+          <span class="tile__cap">Rishikesh · rafting</span>
+        </a>
+        <a class="tile tile--semi" href="/itinerary?trip=g03"data-cursor="Summit" data-reason="Wide top-right frame for the summit: room for the ridge line and the trekkers on it.">
+          <img src="assets/images/places/kedarkantha-summit-sunrise.jpg" alt="Trekkers on the Kedarkantha summit ridge at sunrise in Uttarakhand" width="1600" height="1067" loading="lazy" decoding="async">
+          <span class="tile__cap">Kedarkantha · snow trek</span>
+        </a>
+        <a class="tile tile--tall" href="/itinerary?trip=g04"data-cursor="Thar" data-reason="Tall strip: the long frame stretches the dunes the way the desert road feels.">
+          <img src="assets/images/places/jaisalmer-camel-riders-editorial.jpg" alt="Two riders and a guide crossing the Sam sand dunes by camel near Jaisalmer, Rajasthan" width="1200" height="1500" loading="lazy" decoding="async">
+          <span class="tile__cap">Jaisalmer · dune camp</span>
+        </a>
+        <a class="tile tile--band" href="/itinerary?trip=g05"data-cursor="Udaipur" data-reason="Wide band: the long lake horizon gives Udaipur room to breathe.">
+          <img src="assets/images/places/lake-city.jpg" alt="Passengers aboard a red boat on Lake Pichola in Udaipur, Rajasthan" width="1600" height="1067" loading="lazy" decoding="async">
+          <span class="tile__cap">Udaipur · Lake Pichola</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         7. WHY US
+         TODO(owner): add verified traveller reviews only after approval.
+         ================================================================ -->
+    <section class="section why" data-theme="light" aria-labelledby="why-title">
+      <div class="container">
+        <div class="why__grid">
+          <div class="why__intro">
+            <h2 id="why-title">Why travel with Escape Cartel</h2>
+            <ul class="why__list" role="list">
+              <li data-reveal><strong>Small groups.</strong> Enough people to make friends, few enough that nobody gets lost.</li>
+              <li data-reveal><strong>The full plan before you commit.</strong> Every trip shows its day-by-day itinerary, stays and budget per person before you join.</li>
+              <li data-reveal><strong>Two clear pickup points.</strong> Sundar One hostel gate or the college gate.</li>
+              <li data-reveal><strong>Planned on WhatsApp.</strong> The app you already use, with a real person on the other side.</li>
+            </ul>
+          </div>
+          <div class="reviews">
+            <h3>Built for a clear decision.</h3>
+            <ul class="why__list" role="list">
+              <li><strong>See what is open.</strong> Dates, seats and budgets appear together on every group.</li>
+              <li><strong>Know the route in.</strong> The join flow asks for one of two fixed pickup points.</li>
+              <li><strong>Decide before payment.</strong> Review the budget per person and the day-by-day plan first. Neel confirms every seat on WhatsApp.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         8. FINAL CTA + LEAD FORM (js/leads.js)
+         ================================================================ -->
+    <section class="section cta" id="plan-form" data-theme="dark" aria-labelledby="cta-title">
+      <div class="container cta__grid">
+        <div class="cta__copy">
+          <h2 id="cta-title">Tell us where. We will make the route.</h2>
+          <p class="lead">Share a few details and WhatsApp opens with your message ready to send. A planner replies with a plan and a price breakdown.</p>
+          <ul class="cta__contact" role="list">
+            <li><a class="link-swap" href="tel:+919825744110">Call 98257 44110</a></li>
+            <li><a class="link-swap" data-wa href="https://wa.me/919825744110" target="_blank" rel="noopener">WhatsApp us directly</a></li>
+          </ul>
+        </div>
+
+        <form class="lead-form" data-lead-form novalidate aria-describedby="lead-form-hint">
+          <p class="small muted" id="lead-form-hint">Fields marked * are required.</p>
+          <div class="field">
+            <label for="lf-name">Your name *</label>
+            <input id="lf-name" name="name" type="text" autocomplete="name" required maxlength="80">
+            <p class="field-error" data-error-for="name"></p>
+          </div>
+          <div class="field">
+            <label for="lf-phone">WhatsApp number *</label>
+            <input id="lf-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="98765 43210" maxlength="16">
+            <p class="field-error" data-error-for="phone"></p>
+          </div>
+          <div class="field field--half">
+            <label for="lf-trip">Trip</label>
+            <select id="lf-trip" name="trip" data-trip-select>
+              <option value="">Not sure yet / custom</option>
+            </select>
+          </div>
+          <div class="field field--half">
+            <label for="lf-dates">When</label>
+            <select id="lf-dates" name="dates" data-month-select>
+              <option value="">Flexible</option>
+            </select>
+          </div>
+          <div class="field field--half">
+            <label for="lf-group">Travellers</label>
+            <input id="lf-group" name="groupSize" type="number" inputmode="numeric" min="1" max="60" placeholder="2">
+          </div>
+          <div class="field field--half">
+            <label for="lf-city">Your city</label>
+            <input id="lf-city" name="city" type="text" autocomplete="address-level2" maxlength="60">
+          </div>
+          <div class="field">
+            <label for="lf-email">Email (optional)</label>
+            <input id="lf-email" name="email" type="email" autocomplete="email" maxlength="120">
+            <p class="field-error" data-error-for="email"></p>
+          </div>
+          <div class="field">
+            <label for="lf-msg">Anything else?</label>
+            <textarea id="lf-msg" name="message" rows="3" maxlength="600" placeholder="Stops you want, budget, who is coming"></textarea>
+            <p class="field-error" data-error-for="message"></p>
+          </div>
+          <!-- honeypot: humans never see or fill this -->
+          <div class="hp" aria-hidden="true">
+            <label for="lf-website">Website</label>
+            <input id="lf-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <button class="btn btn--submit btn--lg btn--block" type="submit" data-success-text="Details ready. WhatsApp is opening." data-reset="3500">Send on WhatsApp</button>
+          <div class="form-status" data-form-status></div>
+          <p class="small muted">We only use your number to reply about your trip.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <div data-include="footer"></div>
+
+  <script src="vendor/gsap/gsap.min.js" defer></script>
+  <script src="vendor/gsap/ScrollTrigger.min.js" defer></script>
+  <script src="js/core.js" defer></script>
+  <script src="js/buttons.js" defer></script>
+  <script type="module" src="js/home.js"></script>
+  <script type="module" src="js/fx.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Escape Cartel — static site background
+   Replaces the retired scroll-driven WebGL "Himalaya journey" (no canvas,
+   no three.js, no scroll JS). Load in <head> AFTER every other stylesheet.
+
+   Stack (back to front):
+     html/body background (ink)
+     body::before   fixed, painted once: gradient under a compressed photo.
+                    position: fixed on a pseudo-element (not
+                    background-attachment: fixed) so iOS never repaints it
+                    on scroll. A missing image file just leaves the gradient.
+     page content   section veils keep white copy readable
+   ========================================================================== */
+
+/* 1. Static background. Mobile-first: the small image, then the large one
+   from 48em up. Gradient layers stay underneath as the fallback. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-color: #050505;
+  background-image:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.7) 100%),
+    url("../assets/images/bg/bg-static-mobile.jpg"),
+    radial-gradient(120% 60% at 70% 100%, #2a2a2a 0%, rgba(20, 20, 20, 0) 60%),
+    linear-gradient(180deg, #000000 0%, #0b0b0b 55%, #1c1c1c 100%);
+  background-position: center, center 70%, center, center;
+  background-size: cover, cover, cover, cover;
+  background-repeat: no-repeat;
+}
+@media (min-width: 48em) {
+  body::before {
+    background-image:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.7) 100%),
+      url("../assets/images/bg/bg-static.jpg"),
+      radial-gradient(120% 60% at 70% 100%, #2a2a2a 0%, rgba(20, 20, 20, 0) 60%),
+      linear-gradient(180deg, #000000 0%, #0b0b0b 55%, #1c1c1c 100%);
+  }
+}
+
+/* Retired WebGL canvases: never shown even if old markup lingers. */
+#bg-canvas { display: none !important; }
+
+/* 2. Section veil: fixed token value (was driven per scroll by JS). */
+html body main > section[data-theme] { background-color: var(--glass-section, rgba(0, 0, 0, 0.7)); }
+/* Routes keep solid surfaces so the photo cannot muddy card content. */
+html body .trip-card {
+  background: var(--ink-raised);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Home hero: the real photograph (.hero__poster) is the hero on every screen.
+   The retired per-hero wireframe stays hidden. */
+html body main > section.hero { background: transparent; }
+html body .hero__scene,
+html body .hero__ghost,
+html body .hero__hint { display: none; }
+
+/* The thumb-zone bar is fixed, so reserve scrollable space behind the final
+   row in each mobile section as well as at the end of the page. */
+@media (max-width: 47.99em) {
+  html body main { padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px)); }
+  html body main > section.section,
+  html body main > section.stats,
+  html body main > section.info-hero {
+    padding-bottom: max(var(--section-pad), calc(var(--bottombar-h) + env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+/* Print: plain paper. */
+@media print {
+  body::before, #bg-canvas { display: none !important; }
+  html body main > section[data-theme] {
+    background: #fff !important;
+    --fg: #000;
+    --fg-muted: #333;
+    color: #000;
+  }
+}

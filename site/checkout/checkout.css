@@ -1,0 +1,62 @@
+/* Demo pay page (/pay). The checkout itself is /checkout (css/checkout.css). Variables follow the
+   site's monochrome "Night Pass" palette (css/tokens.css): ink, chalk, greys, no hue. */
+:root {
+  --pay-bg: #000000; --pay-card: #141414; --pay-text: #ffffff; --pay-muted: #c4c4c4; --pay-line: #333333;
+  --pay-accent: #ffffff; --pay-accent-ink: #000000; --pay-danger: #ffffff; --pay-warn-bg: #ffffff; --pay-warn: #000000;
+  --pay-radius: 16px; --pay-font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.pay-body { margin: 0; background: var(--pay-bg); color: var(--pay-text); font: 16px/1.5 var(--font-body); -webkit-font-smoothing: antialiased; }
+.pay-wrap { max-width: 960px; margin: 0 auto; padding: 28px 16px 64px; }
+.pay-head h1 { margin: 6px 0 12px; font-size: clamp(1.6rem, 4vw, 2.2rem); letter-spacing: -0.02em; }
+.pay-back { color: var(--pay-muted); text-decoration: none; font-size: .95rem; }
+.pay-back:hover { color: var(--pay-text); }
+.pay-demo { margin: 0 0 18px; padding: 10px 14px; border-radius: 12px; background: var(--pay-warn-bg); color: var(--pay-warn); font-size: .95rem; }
+.pay-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 760px) { .pay-grid { grid-template-columns: 1fr; } }
+.pay-card { background: var(--pay-card); border: 1px solid var(--pay-line); border-radius: var(--pay-radius); padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.pay-summary { display: grid; gap: 10px; align-self: start; }
+.pay-row { display: flex; justify-content: space-between; gap: 12px; }
+.pay-total { padding-top: 10px; border-top: 1px solid var(--pay-line); font-weight: 700; font-size: 1.15rem; }
+.pay-muted { color: var(--pay-muted); }
+.small { font-size: .85rem; }
+.pay-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+.pay-tabs { display: flex; gap: 6px; padding: 4px; margin-bottom: 18px; background: var(--pay-bg); border-radius: 12px; }
+.pay-tabs button { flex: 1; min-height: 42px; border: 0; border-radius: 9px; background: transparent; color: var(--pay-muted); font: 600 .95rem var(--pay-font); cursor: pointer; }
+.pay-tabs button.on { background: var(--pay-card); color: var(--pay-text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.pay-panel { display: grid; gap: 14px; justify-items: start; }
+.pay-qr { width: min(240px, 70vw); padding: 10px; border: 1px solid var(--pay-line); border-radius: 14px; background: #fff; justify-self: center; }
+.pay-qr svg { display: block; width: 100%; height: auto; }
+.pay-panel p { margin: 0; }
+.pay-form { display: grid; gap: 12px; width: 100%; }
+.pay-form label { display: grid; gap: 6px; font-size: .9rem; color: var(--pay-muted); }
+.pay-form input, .pay-form select { width: 100%; min-height: 46px; padding: 0 12px; border: 1px solid var(--pay-line); border-radius: 10px; background: var(--pay-bg); color: var(--pay-text); font: 1rem var(--pay-font); }
+.pay-form input:focus, .pay-form select:focus { outline: 2px solid var(--pay-accent); outline-offset: 1px; }
+.pay-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pay-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 20px; border: 0; border-radius: 12px; background: var(--pay-accent); color: var(--pay-accent-ink); font: 600 1rem var(--pay-font); text-decoration: none; cursor: pointer; }
+.pay-btn.big { width: 100%; min-height: 52px; font-size: 1.05rem; }
+.pay-btn.ghost { background: transparent; color: var(--pay-text); border: 1px solid var(--pay-line); }
+.pay-btn:disabled { opacity: .6; cursor: progress; }
+.pay-link { justify-self: center; border: 0; background: none; color: var(--pay-muted); text-decoration: underline; font: .9rem var(--pay-font); cursor: pointer; padding: 6px; }
+.pay-status { color: var(--pay-muted); font-size: .92rem; }
+.pay-status::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--pay-accent); animation: pay-pulse 1.4s ease-in-out infinite; }
+@keyframes pay-pulse { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .pay-status::before { animation: none; } }
+.pay-error { color: var(--pay-danger); margin: 10px 0 0; font-size: .95rem; min-height: 1em; }
+.pay-result { text-align: center; display: grid; gap: 8px; justify-items: center; margin-bottom: 18px; }
+.pay-result h2 { margin: 4px 0 0; }
+.pay-result p { margin: 0; }
+.pay-tick { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--pay-accent); color: var(--pay-accent-ink); font-size: 1.6rem; font-weight: 700; }
+.pay-tick.wait { background: var(--pay-warn-bg); color: var(--pay-warn); }
+.pay-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+/* Demo "payment app" page opened on the phone */
+.bank { width: min(100% - 2rem, 520px); margin: 0 auto; min-height: 70svh; padding: calc(var(--header-h) + 3rem) 0 4rem; display: grid; align-content: start; gap: 16px; }
+.bank h1 { font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3rem); line-height: 1.05; }
+.bank > .pay-btn { justify-self: start; }
+.bank-top { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.bank-top i { width: 34px; height: 34px; border-radius: 10px; background: var(--pay-accent); display: grid; place-items: center; color: var(--pay-accent-ink); font-style: normal; }
+.bank-amount { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; margin: 8px 0 0; }
+@media print { .pay-actions, .pay-back, .pay-demo { display: none; } .pay-body { background: #fff; } }
+.pay-qr img { display: block; width: 100%; height: auto; border-radius: 8px; }

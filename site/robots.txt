@@ -1,0 +1,9 @@
+# TODO(owner): replace https://www.example.com with the live domain.
+User-agent: *
+Allow: /
+Disallow: /styleguide.html
+Disallow: /create.html
+Disallow: /create
+Disallow: /admin/
+
+Sitemap: https://www.example.com/sitemap.xml

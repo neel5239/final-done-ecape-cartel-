@@ -1,0 +1,683 @@
+/* ==========================================================================
+   Home page — "Survey at first light"
+   Loads after tokens.css, base.css, buttons.css. Only home-specific layout.
+   Real destination photography keeps its colour; interface chrome follows
+   the client's black / white / grey palette.
+   ========================================================================== */
+
+/* ---------- 1. Hero --------------------------------------------------------
+   Composition drawn on one 1440 x 900 frame; every hero dimension is
+   N * --u. Phones redefine --u against a 390px frame and re-place the same
+   elements (no second design). */
+.hero {
+  --u: calc(100vw / 1440);
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: transparent; /* the fixed #bg-canvas scene shows through; body is ink if it fails */
+  color: var(--chalk);
+  isolation: isolate;
+}
+@media (min-width: 1800px) { .hero { --u: calc(1800px / 1440); } }
+
+/* Real Kedarkantha photo: full-bleed for scale, translucent enough that the
+   fixed WebGL ridges still move beneath it. The scrim protects white copy. */
+.hero__poster {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 60% 60%;
+  opacity: 1; /* full natural colour (0.76 let the dark scene mute it) */
+  transition: opacity 900ms var(--ease-out);
+}
+
+/* Ghost wordmark: sits BEHIND the canvas, so the ridges cut through it. */
+.hero__ghost {
+  display: none;
+  position: absolute;
+  z-index: 1;
+  left: calc(-20 * var(--u));
+  top: calc(150 * var(--u));
+  max-width: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: calc(360 * var(--u));
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--ink-line);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  --pd: 6; --pr: 0;
+}
+
+/* Departure card: z-index auto (no stacking context) so the canvas paints
+   over its lower edge — the front ridge literally stands in front of it. */
+.hero-card {
+  position: absolute;
+  right: calc(96 * var(--u));
+  bottom: calc(150 * var(--u));
+  width: max(15rem, calc(300 * var(--u)));
+  padding: var(--space-3) var(--space-3) var(--space-5);
+  border: 1px solid var(--ink-line);
+  border-radius: var(--radius-md);
+  background: var(--ink-raised);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06); /* no backdrop-filter over a live canvas */
+  --pd: 22; --pr: 2.4;
+}
+.hero-card__eyebrow { font-size: var(--step--1); color: var(--ash); font-weight: 700; letter-spacing: 0.04em; }
+.hero-card__trip { font-family: var(--font-display); font-weight: 700; font-size: var(--step-1); line-height: 1.15; margin-top: var(--space-1); }
+.hero-card__meta { font-size: var(--step--1); color: var(--chalk-line); margin-top: var(--space-0); }
+.hero-card .link-swap { position: relative; z-index: 4; color: var(--chalk); }
+/* Seats row + real button. The retired canvas no longer overlaps the card's
+   lower edge, so the old tall bottom padding (dead space) is gone. */
+.hero-card { display: flex; flex-direction: column; gap: var(--space-0); padding: var(--space-3); }
+.hero-card__seats { display: grid; gap: 6px; margin-top: var(--space-2); font-size: 0.875rem; font-weight: 700; }
+.hero-card__seats[hidden] { display: none; }
+.hero-card__seats .spots__row > span:last-child { color: var(--chalk-line); font-weight: 600; }
+.hero-card__cta { position: relative; z-index: 4; align-self: stretch; justify-content: center; margin-top: var(--space-2); min-height: var(--tap); }
+
+.hero__scene {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none; /* pointer is read on window; clicks reach the card */
+  opacity: 0;
+  transition: opacity 1200ms var(--ease-out);
+}
+.hero.is-gl .hero__scene { opacity: 1; }
+
+/* Legibility over a scene that brightens: a copy-column wash plus a top band
+   (under the header) and a bottom band (into the next glass section). The
+   summit side stays open. */
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    /* Lighter scrim so the photo keeps its colour: a thin band under the
+       header, a light bottom fade, and a soft left fade behind the copy
+       (was 0.7 / 0.7 / 0.82 black). Headline also carries a text-shadow. */
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 16%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 26%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.66) 0%, rgba(0, 0, 0, 0.38) 38%, rgba(0, 0, 0, 0) 60%);
+}
+
+.hero__copy {
+  position: relative;
+  z-index: 4;
+  padding-top: calc(var(--header-h) + var(--space-4));
+  padding-bottom: var(--space-6);
+}
+/* keeps the white headline readable now that the scrim is lighter */
+.hero__title { text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5); }
+.hero__title {
+  max-width: 13ch;
+  font-size: clamp(2.5rem, calc(84 * var(--u)), 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.hero__sub {
+  max-width: 34rem;
+  margin-top: var(--space-3);
+  font-size: var(--step-1);
+  line-height: 1.45;
+  color: var(--chalk-line); /* #e5e5e5: stays above AA even over lit facets */
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
+}
+/* Secondary hero CTA: the outline button sits over bright 3D facets, so it
+   gets its own dark fill (the liquid wave still floods it on hover/press). */
+.hero .btn--liquid-fill {
+  background: rgba(0, 0, 0, 0.78);
+  border-color: var(--chalk-line);
+  color: var(--chalk);
+}
+.hero__ctas { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+
+/* Split reveal: words sit in masks. Hidden only while JS is about to run the
+   reveal; a failsafe animation shows them after 2.5s whatever happens. */
+.hero__title .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.06em; margin-bottom: -0.06em; }
+.hero__title .w > span { display: inline-block; will-change: transform; }
+.js .hero__title[data-split], .js [data-hero-fade] { visibility: hidden; animation: hero-failsafe 0s linear 2.5s forwards; }
+.js .hero__title.is-split, .js .hero.is-revealed [data-hero-fade] { visibility: visible; animation: none; }
+@keyframes hero-failsafe { to { visibility: visible; } }
+
+/* Parallax layers: the scene loop writes --px/--py; each layer only declares
+   travel (--pd) and tilt (--pr). */
+.par {
+  transform:
+    perspective(1400px)
+    translate3d(calc(var(--px, 0) * var(--pd, 0) * -1px), calc(var(--py, 0) * var(--pd, 0) * -0.62px), 0)
+    rotateY(calc(var(--px, 0) * var(--pr, 0) * 1deg))
+    rotateX(calc(var(--py, 0) * var(--pr, 0) * -0.7deg));
+}
+
+@media (max-width: 47.99em) {
+  .hero { --u: calc(100vw / 390); flex-direction: column; align-items: stretch; }
+  .hero__copy { order: 1; padding-top: calc(var(--header-h) + var(--space-4)); padding-bottom: var(--space-3); }
+  .hero__title { font-size: calc(44 * var(--u)); max-width: 11ch; }
+  .hero__sub { font-size: var(--step-0); max-width: 30ch; }
+  .hero__ghost { top: auto; bottom: calc(210 * var(--u)); font-size: calc(150 * var(--u)); left: calc(-8 * var(--u)); }
+  /* Route card occupies the former empty lower half of the mobile hero. */
+  .hero-card {
+    position: relative;
+    inset: auto;
+    z-index: 4;
+    order: 2;
+    display: block;
+    align-self: flex-end;
+    width: min(19rem, calc(100% - var(--gutter) * 2));
+    margin: auto var(--gutter) calc(var(--bottombar-h) + var(--space-2));
+    padding: var(--space-2);
+    transform: none;
+  }
+  .hero__scrim {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.25) 45%, rgba(0, 0, 0, 0) 65%),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 22%);
+  }
+  .hero__ctas .btn { flex: 1 1 100%; }
+}
+
+/* Interaction hint: bottom-right, only once the scene is live. */
+.hero__hint {
+  position: absolute;
+  z-index: 4;
+  left: var(--gutter);
+  bottom: var(--space-3);
+  margin: 0;
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--chalk);
+  /* dark pill so the hint reads over any lit facet */
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.78);
+  border: 1px solid var(--ink-line);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s var(--ease-out) 1.5s;
+}
+.hero.is-gl .hero__hint { opacity: 1; }
+.hero__hint-touch { display: none; }
+@media (hover: none) { .hero__hint-fine { display: none; } .hero__hint-touch { display: inline; } }
+@media (max-width: 47.99em) { .hero__hint { bottom: var(--space-2); } }
+@media (prefers-reduced-motion: reduce) { .hero__hint { display: none; } }
+
+/* ---------- 2. Stats ------------------------------------------------------ */
+.stats { padding-block: var(--space-5); border-top: 1px solid var(--glass-line); }
+.stats__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-2); }
+@media (min-width: 48em) { .stats__row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat { display: flex; flex-direction: column-reverse; gap: var(--space-0); padding-left: var(--space-2); border-left: 1px solid var(--glass-line); min-width: 0; }
+.stat dt { font-size: var(--step--1); color: var(--mist); font-weight: 600; }
+.stat dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: var(--step-4); line-height: 1; letter-spacing: -0.03em; }
+.stat--soon dd { font-size: var(--step-2); color: var(--mist); }
+.stats__note { margin-top: var(--space-3); font-size: var(--step--1); color: var(--mist); }
+
+/* ---------- 3. Trips preview ---------------------------------------------- */
+.trips__head { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); align-items: end; margin-bottom: var(--space-5); }
+.trips__head h2 { max-width: 18ch; margin-top: var(--space-1); }
+@media (min-width: 64em) { .trips__head { grid-template-columns: minmax(0, 1fr) auto; } }
+.trips__filter { justify-self: start; max-width: 100%; }
+.trips__advanced {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+@media (min-width: 48em) { .trips__advanced { max-width: 32rem; } }
+.trips__advanced label { display: grid; gap: var(--space-0); min-width: 0; font-size: var(--step--1); font-weight: 700; }
+.trips__advanced select { min-width: 0; width: 100%; min-height: var(--tap); padding: 0.55rem 0.8rem; border: 1px solid var(--line-strong); border-radius: var(--radius-xs); background: var(--bg); color: var(--fg); font-size: 1rem; }
+.trips__filter-note { margin-bottom: var(--space-4); }
+
+.trip-grid {
+  display: grid;
+  gap: var(--space-5) var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  margin: 0;
+  padding: 0;
+}
+.trip-grid.is-empty::after { content: "No trips of this type yet. Try another filter."; color: var(--fg-muted); }
+/* Each card is a glass panel (recipe at the end of this file). Grid rows
+   stretch every card to the tallest in the row; the body grows and the
+   spots bar + price/CTA are pinned to the bottom so rows line up. */
+.trip-card { position: relative; display: flex; flex-direction: column; min-width: 0; padding: var(--space-1) var(--space-1) var(--space-3); border-radius: var(--radius-lg); }
+/* Rounded 16:10 frame (was an arch that cropped heads and landmarks). */
+.trip-card__media {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--ink-raised);
+}
+.trip-card__media img { width: 100%; height: 100%; object-fit: cover; object-position: var(--focus, 50% 50%); transition: transform 900ms var(--ease-out); }
+@media (hover: hover) { .trip-card:hover .trip-card__media img { transform: scale(1.04); } }
+/* Heart + compare sit on the photo: solid-dark discs with a light rim so they
+   read on any part of any image (>= 3:1 for the rim, 44px targets). */
+.trip-card__media .btn-heart {
+  position: absolute; right: var(--space-2); bottom: var(--space-2);
+  width: 2.75rem; height: 2.75rem;
+  color: var(--chalk); background: rgba(0, 0, 0, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.trip-card__compare {
+  position: absolute; z-index: 3; top: var(--space-2); left: var(--space-2);
+  min-height: var(--tap); padding-inline: 0.9rem;
+  background: rgba(0, 0, 0, 0.78); color: var(--chalk);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  --inverse-bg: var(--chalk); --inverse-fg: var(--ink);
+}
+.trip-card__tag {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--chalk);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+.trip-card__body { display: flex; flex: 1; flex-direction: column; gap: var(--space-1); padding: var(--space-2) var(--space-2) 0; min-width: 0; }
+/* Content stacks from the top; only the price/CTA row is pushed down, so a
+   taller neighbour never opens a hole between the pickup line and the seats. */
+.trip-card__body > .spots { padding-top: var(--space-1); }
+.trip-card__body > .trip-card__foot { margin-top: auto; }
+.trip-card__where { font-size: var(--step--1); font-weight: 700; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--fg-muted); }
+.trip-card__name { font-size: var(--step-2); }
+.trip-card__name a { text-decoration: none; }
+.trip-card__name a::after { content: ""; position: absolute; inset: 0; z-index: 1; } /* whole card clickable */
+.trip-card__line { color: var(--fg-muted); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.trip-card__facts { display: flex; flex-wrap: wrap; gap: var(--space-0) var(--space-2); font-size: var(--step--1); font-weight: 600; }
+.spots { display: grid; gap: 6px; font-size: var(--step--1); font-weight: 700; }
+.spots__bar { height: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
+.spots__bar i { display: block; height: 100%; background: var(--chalk); transform-origin: left; transform: scaleX(var(--fill, 0)); transition: transform 1s var(--ease-out); }
+.trip-card__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-1); padding-top: var(--space-2); border-top: 1px solid var(--glass-line); }
+.trip-card__price { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1); font-variant-numeric: tabular-nums; }
+.trip-card__foot .btn, .trip-card__media .btn-heart { position: relative; z-index: 2; } /* above the card link */
+.trip-card__media .btn-heart { position: absolute; }
+.trip-card__reason { font-size: var(--step--1); color: var(--fg-muted); font-style: italic; }
+.availability-note { color: var(--fg-muted); font-size: var(--step--1); font-weight: 700; }
+/* Card buyer info: difficulty, next date, group, inclusions */
+.trip-card__chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.trip-card__chips li { display: inline-flex; align-items: center; min-height: 1.75rem; padding: 0.15rem 0.65rem; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font-size: var(--step--1); font-weight: 700; }
+.trip-card__chips .diff-tag { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.trip-card__incl { font-size: var(--step--1); color: var(--fg-muted); }
+.trip-card__incl span { font-weight: 800; color: var(--fg); }
+.spots__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px; }
+.trip-card__price { display: flex; flex-wrap: wrap; align-items: center; gap: 4px var(--space-1); min-width: 0; }
+.spots__row .ph-tag { margin-left: 0; }
+.trip-card__price .ph-tag { margin-left: 0; }
+
+.trips__more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding: var(--space-3);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+}
+.trips__more p { max-width: 60ch; }
+.trips__note { margin-top: var(--space-2); }
+/* Adjacent section colors already provide separation; keep the content gap compact. */
+.trips { padding-top: var(--space-5); padding-bottom: var(--space-4); }
+.flex { padding-top: var(--space-4); }
+.how { padding-bottom: var(--space-4); }
+.mosaic { padding-top: var(--space-4); }
+
+.home-compare {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: var(--z-bottombar);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+  padding: var(--space-2) var(--gutter) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(14px); /* was saturate(0): greyed photos beneath */
+  backdrop-filter: blur(14px);
+  color: var(--chalk);
+  border-top: 1px solid var(--glass-line);
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.2);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+.home-compare[hidden] { display: none; }
+.home-compare__actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-1); }
+.home-compare__actions > button { min-height: var(--tap); padding-inline: var(--space-2); text-decoration: underline; }
+body.has-home-compare .bottom-bar { transform: translateY(110%); }
+body.has-home-compare .wa-fab { opacity: 0; pointer-events: none; }
+body.has-home-compare .site-footer { padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom, 0px)); }
+
+/* ---------- 4. Flexibility ------------------------------------------------ */
+.flex__head { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); }
+@media (min-width: 64em) { .flex__head { grid-template-columns: 1fr 1fr; align-items: end; } }
+.flex-grid { display: grid; gap: var(--space-2); padding: 0; margin: 0; }
+@media (min-width: 48em) { .flex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64em) {
+  .flex-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .flex-card--wide { grid-column: span 2; }
+}
+.flex-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.flex-card p { color: var(--fg-muted); flex: 1; }
+.flex-card .badge { margin-top: var(--space-1); }
+.flex-card__num { font-family: var(--font-display); font-weight: 800; font-size: var(--step-3); line-height: 1; color: var(--mist); }
+.flex-card--solid { background: var(--chalk); color: var(--ink); border-color: var(--chalk); --inverse-bg: var(--ink); --inverse-fg: var(--chalk); --fg: var(--ink); --fg-muted: var(--graphite); --focus-ring: var(--ink); --focus-halo: var(--chalk); }
+.flex-card--solid .flex-card__num { color: var(--graphite); } /* 7:1 on white */
+.flex-card--solid .btn { margin-top: var(--space-2); }
+.flex__note { margin-top: var(--space-3); }
+
+/* ---------- 5. How it works ----------------------------------------------- */
+.how h2 { max-width: 16ch; }
+.how__steps { display: grid; gap: var(--space-4); margin-top: var(--space-5); padding: 0; counter-reset: none; }
+@media (min-width: 48em) { .how__steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.how-step { position: relative; display: grid; align-content: start; gap: var(--space-1); padding-top: var(--space-3); border-top: 2px solid var(--fg); }
+.how-step__num { font-family: var(--font-display); font-weight: 800; font-size: var(--step-5); line-height: 0.9; }
+.how-step p { color: var(--fg-muted); }
+
+/* ---------- 6. Mosaic ----------------------------------------------------- */
+.mosaic { overflow: hidden; }
+.mosaic__head { display: grid; gap: var(--space-2); margin-bottom: var(--space-5); }
+@media (min-width: 64em) { .mosaic__head { grid-template-columns: 1fr 1fr; align-items: end; } }
+.mosaic__grid {
+  display: grid;
+  gap: var(--space-2);
+  padding-inline: var(--gutter);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "large large"
+    "semi  semi"
+    "tall  inset"
+    "band  band";
+}
+.tile { position: relative; display: block; overflow: hidden; text-decoration: none; color: var(--chalk); background: var(--ink-raised); min-width: 0; }
+.tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease-out); }
+@media (hover: hover) { .tile:hover img { transform: scale(1.05); } }
+.tile__cap {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 1;
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+/* Phones: inset like every other tile (same gutter, all four corners rounded). */
+.tile--large { grid-area: large; aspect-ratio: 4 / 3; border-radius: var(--radius-lg); }
+.tile--semi { grid-area: semi; aspect-ratio: 2 / 1; border-radius: var(--radius-md); } /* rounded rect: the arch cut off the trekkers */
+.tile--semi .tile__cap { left: 50%; transform: translateX(-50%); white-space: nowrap; }
+.tile--tall { grid-area: tall; aspect-ratio: 3 / 4; border-radius: var(--radius-md); }
+.tile--inset { grid-area: inset; aspect-ratio: 3 / 4; border-radius: var(--radius-md); }
+.tile--inset img { object-position: 84% 50%; } /* keep both houseboat passengers in the narrow crop */
+.tile--band { grid-area: band; aspect-ratio: 16 / 7; border-radius: var(--radius-md); }
+
+@media (min-width: 64em) {
+  .mosaic__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: repeat(6, clamp(5rem, 7vw, 7.5rem));
+    grid-template-areas: none;
+    gap: var(--space-3);
+    padding-inline: 0 var(--gutter);
+  }
+  /* large tile hugs the left viewport edge (corner-anchored) */
+  .tile--large { grid-column: 1 / 8; grid-row: 1 / 6; aspect-ratio: auto; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+  /* inset overlaps the large tile's lower-right corner */
+  .tile--inset { grid-column: 6 / 9; grid-row: 4 / 7; aspect-ratio: auto; z-index: 2; border: 6px solid var(--ink); border-radius: calc(var(--radius-md) + 6px); }
+  .tile--semi { grid-column: 9 / 13; grid-row: 1 / 3; aspect-ratio: auto; }
+  .tile--tall { grid-column: 9 / 11; grid-row: 3 / 7; aspect-ratio: auto; }
+  .tile--band { grid-column: 11 / 13; grid-row: 3 / 7; aspect-ratio: auto; }
+}
+
+/* ---------- 7. Why + reviews ---------------------------------------------- */
+.why__grid { display: grid; gap: var(--space-5); }
+@media (min-width: 64em) { .why__grid { grid-template-columns: 5fr 7fr; gap: var(--space-6); } }
+.why__list { display: grid; gap: var(--space-2); margin-top: var(--space-4); padding: 0; }
+.why__list li { padding-bottom: var(--space-2); border-bottom: 1px solid var(--line); color: var(--fg-muted); }
+.why__list strong { color: var(--fg); }
+.reviews__label { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); font-size: var(--step--1); color: var(--fg-muted); margin-bottom: var(--space-3); max-width: none; }
+.reviews__list { display: grid; gap: var(--space-2); padding: 0; }
+@media (min-width: 48em) { .reviews__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } .review:first-child { grid-column: span 2; } }
+.review { display: grid; align-content: start; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.review__stars { letter-spacing: 0.15em; color: var(--fg); font-size: var(--step-0); }
+.review blockquote { margin: 0; font-size: var(--step-0); font-weight: 500; line-height: 1.55; }
+.review:first-child blockquote { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; line-height: 1.35; }
+.proof-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: 0 0 var(--space-4); }
+.proof-stat { display: flex; flex-direction: column-reverse; gap: var(--space-0); padding: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-sm); min-width: 0; }
+.proof-stat dt { font-size: var(--step--1); font-weight: 600; color: var(--fg-muted); }
+.proof-stat dd { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); min-width: 0; }
+.proof-stat .num { font-family: var(--font-display); font-weight: 800; font-size: var(--step-3); line-height: 1; letter-spacing: -0.03em; overflow-wrap: anywhere; }
+.proof-stat .ph-tag { margin-left: 0; }
+@media (max-width: 29.99em) { .proof-stats { grid-template-columns: minmax(0, 1fr); } }
+.review__who { font-size: var(--step--1); font-weight: 700; color: var(--fg-muted); }
+
+/* ---------- 8. CTA + form ------------------------------------------------- */
+.cta__grid { display: grid; gap: var(--space-5); }
+@media (min-width: 64em) { .cta__grid { grid-template-columns: 1fr 1fr; align-items: start; gap: var(--space-6); } }
+.cta__copy h2 { max-width: 14ch; }
+.cta__copy .lead { margin-top: var(--space-2); }
+.cta__contact { display: grid; gap: 0; margin-top: var(--space-3); padding: 0; }
+
+.lead-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.lead-form > * { grid-column: 1 / -1; min-width: 0; }
+.lead-form > .field--half { grid-column: span 1; }
+@media (max-width: 23.9em) { .lead-form > .field--half { grid-column: 1 / -1; } }
+.field { display: grid; gap: 6px; }
+.field label { font-size: var(--step--1); font-weight: 700; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 1rem; /* 16px: stops iOS zoom on focus */
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.field textarea { resize: vertical; min-height: 6rem; }
+.field input::placeholder, .field textarea::placeholder { color: var(--fg-muted); opacity: 1; } /* ash failed AA on the light ground */
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { border-color: var(--fg); border-radius: var(--radius-xs); }
+@media (hover: hover) { .field input:hover, .field select:hover, .field textarea:hover { border-color: var(--fg-muted); } }
+.field [aria-invalid="true"] { border-color: var(--fg); border-width: 2px; }
+.field-error { font-size: var(--step--1); font-weight: 700; }
+.field-error:empty { display: none; }
+.field-error:not(:empty)::before { content: "! "; }
+.form-status { font-weight: 600; }
+.form-status:empty { display: none; }
+.form-status[data-state="success"], .form-status[data-state="error"] { padding: var(--space-2); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); }
+.form-status[data-state="error"] { border-style: dashed; }
+.form-status__link { font-weight: 800; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.lead-form { position: relative; }
+
+/* ---------- Glass surfaces over the scene ----------------------------------
+   Same recipe as .glass in base.css: near-black 0.66 fill, 12px blur, light
+   hairline. Phones / touch skip the blur and use the denser fill. The hero
+   card keeps its solid fill (it sits on the hero's own live canvas). */
+.trip-card, .flex-card:not(.flex-card--solid), .review, .lead-form, .proof-stat, .trips__more {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+@media (max-width: 47.99em), (pointer: coarse) {
+  .trip-card, .flex-card:not(.flex-card--solid), .review, .lead-form, .proof-stat, .trips__more {
+    -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--glass-strong);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .trip-card, .flex-card:not(.flex-card--solid), .review, .lead-form, .proof-stat, .trips__more { background: var(--glass-strong); }
+}
+.trips__more { border-style: dashed; border-color: rgba(255, 255, 255, 0.4); }
+
+/* ---------- Reduced motion ------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .par { transform: none !important; }
+  .hero__poster { opacity: 1 !important; }
+  .hero__scene { display: none; }
+  .js .hero__title[data-split], .js [data-hero-fade] { visibility: visible; animation: none; }
+}
+
+/* ---------- task: student group trips ---------------------------------------
+   Upcoming groups teaser, 4-step how-it-works, create CTA + Sundar One perk,
+   sticky "Next up" bar. Same monochrome glass language as the rest of home. */
+
+/* Upcoming groups */
+.groups { padding-top: var(--space-5); padding-bottom: var(--space-4); }
+.groups__head { display: grid; gap: var(--space-3); align-items: end; margin-bottom: var(--space-4); }
+.groups__head h2 { max-width: 18ch; margin-top: var(--space-1); }
+.groups__head h2:focus { outline: none; }
+.groups__head .btn { justify-self: start; }
+@media (min-width: 64em) { .groups__head { grid-template-columns: minmax(0, 1fr) auto; } }
+.group-grid { display: grid; gap: var(--space-3); padding: 0; margin: 0; list-style: none; }
+@media (min-width: 48em) { .group-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64em) { .group-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.group-grid__empty { color: var(--fg-muted); }
+.group-card {
+  position: relative; display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+  border-radius: var(--radius-md); background: var(--glass-strong); border: 1px solid var(--glass-line);
+}
+.group-card__media { position: relative; margin: 0; aspect-ratio: 16 / 10; overflow: hidden; background: var(--ink-raised); }
+.group-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 900ms var(--ease-out); }
+@media (hover: hover) { .group-card:hover .group-card__media img { transform: scale(1.04); } }
+.group-card__tag {
+  position: absolute; left: var(--space-2); top: var(--space-2);
+  padding: 0.2rem 0.7rem; border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.72); color: var(--chalk); font-size: var(--step--1); font-weight: 700;
+}
+.group-card__body { display: flex; flex: 1; flex-direction: column; gap: var(--space-1); padding: var(--space-3); }
+.group-card__where { font-size: var(--step--1); font-weight: 700; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--fg-muted); }
+.group-card__name { font-size: var(--step-1); }
+.group-card__name a { text-decoration: none; }
+.group-card__name a::after { content: ""; position: absolute; inset: 0; z-index: 1; } /* whole card clickable */
+.group-card__when { font-size: var(--step--1); color: var(--fg-muted); }
+.group-card .spots { padding-top: var(--space-1); }
+.group-card__body > .group-card__foot { margin-top: auto; }
+.group-card .spots__row > span:last-child { color: var(--fg-muted); }
+.spots--low .spots__row > span:first-child::before {
+  content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.4em;
+  border-radius: 50%; background: currentColor; vertical-align: 0.05em;
+}
+.group-card__foot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2);
+  margin-top: var(--space-1); padding-top: var(--space-2); border-top: 1px solid var(--glass-line);
+}
+.group-card__price { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1); font-variant-numeric: tabular-nums; }
+.group-card__price span { font-family: var(--font-body); font-size: var(--step--1); font-weight: 600; color: var(--fg-muted); }
+.group-card__foot .btn { position: relative; z-index: 2; min-height: var(--tap); }
+/* Pickup line lives in the section head, under the heading it belongs to. */
+.groups__pickup { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-0) var(--space-1); margin-top: var(--space-2); color: var(--chalk-line); font-size: max(0.875rem, var(--step--1)); }
+.groups__pickup strong { color: var(--chalk); font-weight: 800; letter-spacing: var(--tracking-caps); text-transform: uppercase; font-size: 0.75rem; }
+.groups__note { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); margin-top: var(--space-3); }
+.groups__note .ph-tag, .stats__note .ph-tag { margin-left: 0; }
+
+/* How it works: 4 steps */
+@media (min-width: 48em) { .how__steps--four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64em) { .how__steps--four { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.how .eyebrow { margin-bottom: var(--space-1); }
+.how-step strong { color: var(--fg); }
+
+/* Create your own trip + Sundar One perk */
+.create-cta { padding-top: var(--space-4); }
+.create-cta__grid { display: grid; gap: var(--space-3); }
+@media (min-width: 64em) { .create-cta__grid { grid-template-columns: 7fr 5fr; align-items: stretch; } }
+.create-cta__panel {
+  display: grid; align-content: center; gap: var(--space-2); padding: clamp(var(--space-3), 5vw, var(--space-5));
+  border-radius: var(--radius-lg); background: var(--chalk); color: var(--ink);
+  --fg: var(--ink); --fg-muted: var(--graphite); --inverse-bg: var(--ink); --inverse-fg: var(--chalk);
+  --line: var(--chalk-line); --line-strong: var(--graphite); --focus-ring: var(--ink); --focus-halo: var(--chalk);
+}
+.create-cta__panel h2 { max-width: 16ch; }
+.create-cta__panel p { color: var(--graphite); max-width: 52ch; }
+.create-cta__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-1); }
+.create-cta__panel .btn--ghost { color: var(--ink); border-color: var(--ink); }
+.perk {
+  position: relative; display: grid; align-content: start; gap: var(--space-2); padding: clamp(var(--space-3), 4vw, var(--space-4));
+  border-radius: var(--radius-lg); border: 1px dashed rgba(255, 255, 255, 0.4); background: var(--glass-strong); overflow: hidden;
+}
+.perk::before { /* soft light pooled in the corner, painted once */
+  content: ""; position: absolute; top: -40%; right: -40%; width: 80%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.12), transparent); pointer-events: none;
+}
+.perk__badge {
+  justify-self: start; padding: 0.25rem 0.8rem; border-radius: var(--radius-pill);
+  border: 1px solid var(--chalk); font-size: var(--step--1); font-weight: 800; letter-spacing: 0.04em;
+}
+.perk h3 { font-size: var(--step-2); max-width: 18ch; }
+.perk p { color: var(--mist); }
+.perk .small { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); }
+.perk .ph-tag { margin-left: 0; }
+.perk .link-swap { justify-self: start; display: inline-flex; align-items: center; min-height: var(--tap); font-weight: 700; }
+/* Size to its content next to the taller white panel (no stretched empty box). */
+@media (min-width: 64em) { .perk { align-self: start; } }
+.perk__trips { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.perk__trips:empty { display: none; }
+.perk__trips a {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); min-height: var(--tap);
+  padding: 0.5rem 0.9rem; border-radius: var(--radius-md); border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--chalk); text-decoration: none; transition: border-color 0.25s var(--ease-out), background-color 0.25s var(--ease-out);
+}
+.perk__trips a:hover { border-color: var(--chalk); background: rgba(255, 255, 255, 0.06); }
+.perk__trips strong { font-weight: 700; }
+.perk__trips span { color: var(--mist); font-size: var(--step--1); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .group-card__media img, .trip-card__media img { transition: none; }
+}
+/* /task */
+
+/* Student group cards: readable details and unobstructed actions. */
+.trip-card__details { color: var(--chalk-line); font-size: max(0.875rem, var(--step--1)); line-height: 1.5; }
+.trip-card__details strong { color: var(--chalk); }
+.trip-card__line, .trip-card__where, .trip-card .spots__row,
+.group-card__where, .group-card__when, .group-card .spots__row,
+.group-card__price span { color: var(--chalk-line); font-size: max(0.875rem, var(--step--1)); }
+.trip-card__price span { color: var(--chalk-line); font-family: var(--font-body); font-size: 0.875rem; font-weight: 600; }
+.trip-card__foot .btn { position: relative; z-index: 2; min-height: var(--tap); }
+.hero-card__meta { color: var(--chalk-line); font-size: 0.875rem; }
+@media (max-width: 47.99em) {
+  .hero { min-height: 100svh; height: auto; }
+  .hero-card { margin-bottom: var(--space-3); align-self: flex-start; }
+  .hero__copy { padding-bottom: var(--space-2); }
+}

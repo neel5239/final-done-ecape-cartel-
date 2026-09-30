@@ -1,0 +1,544 @@
+/* ==========================================================================
+   Escape Cartel — base + site shell
+   Load order on every page: tokens.css -> base.css -> buttons.css -> page css
+   Contents:
+   1. Fonts (self-hosted in /vendor/fonts, font-display: swap)
+   2. Reset
+   3. Typography
+   4. Layout: container, section rhythm, themes
+   5. Accessibility: skip link, focus-visible, sr-only
+   6. Shell: header, mobile nav drawer, footer, mobile bottom bar, WhatsApp FAB
+   7. Reduced motion
+   ========================================================================== */
+
+/* 1. Fonts ---------------------------------------------------------------- */
+/* Self-hosted variable fonts (latin + latin-ext, the latter carries ₹ U+20B9).
+   No third-party request, and swap keeps text visible while fonts load. */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("../vendor/fonts/bricolage-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../vendor/fonts/bricolage-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../vendor/fonts/manrope-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../vendor/fonts/manrope-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* 2. Reset ----------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html {
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + var(--space-2)); /* anchors clear the sticky header */
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+body {
+  max-width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip; /* belt-and-braces against 390px overflow; clip keeps sticky working */
+}
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+img, video { height: auto; }
+input, button, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+ul[role="list"], ol[role="list"] { list-style: none; padding: 0; }
+p, li, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
+table { border-collapse: collapse; }
+[hidden] { display: none !important; }
+::selection { background: var(--fg); color: var(--bg); }
+
+/* 3. Typography ------------------------------------------------------------ */
+h1, h2, h3, h4, .display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  font-variation-settings: "opsz" 96; /* tight display cut at every size */
+}
+h1, .h1 { font-size: var(--step-5); line-height: var(--lh-tight); font-weight: 800; }
+h2, .h2 { font-size: var(--step-4); line-height: 1.05; }
+h3, .h3 { font-size: var(--step-2); }
+h4, .h4 { font-size: var(--step-1); letter-spacing: -0.01em; }
+.display-xl { font-size: var(--step-6); line-height: 0.95; font-weight: 800; }
+p { max-width: 65ch; text-wrap: pretty; }
+.lead { font-size: var(--step-1); line-height: 1.5; color: var(--fg-muted); }
+.muted { color: var(--fg-muted); }
+small, .small { font-size: var(--step--1); }
+/* Small caps label. Use sparingly: max one per three sections. */
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.num, .price, [data-num] { font-variant-numeric: tabular-nums; }
+strong, b { font-weight: 700; }
+hr { border: 0; border-top: 1px solid var(--line); }
+
+/* 4. Layout ---------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: calc(var(--container) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container--narrow { max-width: calc(var(--container-narrow) + var(--gutter) * 2); }
+
+/* Sections are near-black glass bands over the fixed static background
+   (body::before, bg.css). No blur on full-width bands: blurring a whole
+   viewport costs too much on phones, and 0.70
+   black already holds white text above 9:1 on any backdrop (tokens.css). */
+.section {
+  position: relative;
+  padding-block: var(--section-pad);
+  background: var(--glass-section);
+  color: var(--fg);
+  min-width: 0;
+  overflow-x: clip;
+}
+.section--tight { padding-block: var(--space-6); }
+[data-theme] { background-color: var(--glass-section); color: var(--fg); }
+
+/* Glass surface for cards and panels. Page stylesheets add their card
+   selectors to the same recipe; .glass is here for new markup. Blur is kept
+   to bounded boxes. Touch devices and small screens skip the blur (the live
+   canvas would be re-blurred under every card each frame) and use a denser
+   fill instead, which keeps contrast identical and frame rate up. */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+@media (max-width: 47.99em), (pointer: coarse) {
+  .glass { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--glass-strong); }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: var(--glass-strong); }
+}
+.stack > * + * { margin-top: var(--flow, var(--space-2)); }
+.cluster { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); align-items: center; }
+main { display: block; min-width: 0; overflow-x: clip; }
+
+/* 5. Accessibility --------------------------------------------------------- */
+/* Two-tone focus ring: a light ring with a dark halo (or the reverse on light
+   ground) stays visible on black, on white and on top of photos. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--focus-halo);
+  border-radius: var(--radius-xs);
+}
+:focus:not(:focus-visible) { outline: none; }
+
+.skip-link {
+  position: fixed;
+  top: var(--space-1);
+  left: var(--space-1);
+  z-index: var(--z-skip);
+  padding: var(--space-1) var(--space-2);
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  background: var(--chalk);
+  color: var(--ink);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.skip-link:focus { transform: translateY(0); }
+
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Visible "Placeholder" flag for sample prices, dates, stats and reviews
+   until the owner confirms them. Outlined pill, same ink as its text, so it
+   passes contrast on both grounds and never introduces a colour. */
+.ph-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5em;
+  padding: 0.1em 0.55em;
+  border: 1px dashed currentColor;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+  color: var(--fg);
+}
+
+/* Tasteful labelled placeholder for photos only the owner can supply. */
+.photo-soon {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background: repeating-linear-gradient(135deg, var(--surface) 0 12px, var(--bg) 12px 24px);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+/* 6. Shell ----------------------------------------------------------------- */
+
+/* 6a. Header
+   Fixed opaque ink bar keeps moving scenery and cards from showing through
+   the navigation, while preserving the client's white logo. */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: var(--z-sticky);
+  height: var(--header-h);
+  color: var(--fg);
+  background: transparent;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+/* Background lives on a pseudo-element above the page, below nav content. */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #050505;
+  border-bottom: 1px solid var(--glass-line);
+  opacity: 1;
+}
+.site-header.is-hidden { transform: translateY(-100%); }
+.site-header__inner {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+/* Desktop: logo | nav truly centred | actions. Equal outer columns keep the
+   nav on the page axis instead of drifting toward the shorter side. */
+@media (min-width: 64em) {
+  .site-header__inner { display: grid; grid-template-columns: 1fr auto 1fr; }
+  .site-header__actions { justify-self: end; }
+}
+.brand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+/* The emblem is round with the script inside; 64px is the smallest size at
+   which "Escape Cartel" stays readable (logo.md suggests ~72px). */
+.brand__logo {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+/* Only the white logo is used now; the black variant (if an old cached
+   partial still carries it) never shows. */
+.brand__logo--dark { display: none; }
+.brand__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--step-0);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.site-nav { display: none; }
+.site-nav__list { display: flex; gap: var(--space-4); list-style: none; padding: 0; }
+.site-nav__list a { padding-inline: var(--space-0); }
+/* Current page: underline bar so the header shows where you are. */
+.site-nav__list a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.45em; font-weight: 700; }
+.site-header__actions { display: flex; align-items: center; gap: var(--space-1); }
+.header-call__label { display: none; }
+/* Call button: icon-only circle on phones, number shown from 1024px. */
+.site-header .btn--icon-mobile { --btn-pad-x: 0; width: var(--tap); }
+/* Phones: the sticky bottom bar owns "Plan my trip", so the header keeps
+   logo, WhatsApp, call and menu (no duplicate CTA). */
+@media (max-width: 47.99em) { .site-header .header-cta { display: none; } }
+
+/* WhatsApp in the header: 48px disc, shown wherever the floating button is
+   hidden (below 1400px, where it would sit over card content). */
+.header-wa { width: 3rem; height: 3rem; }
+.header-wa svg { width: 1.4rem; height: 1.4rem; }
+@media (min-width: 87.5em) { .header-wa { display: none; } }
+
+@media (min-width: 64em) {
+  .site-nav { display: block; }
+  .nav-toggle { display: none !important; }
+}
+/* The call number label needs the room the header WhatsApp disc frees up at
+   1400px; below that the call button stays an icon so the centred nav grid
+   never overflows. */
+@media (min-width: 87.5em) {
+  .header-call__label { display: inline; }
+  .site-header .btn--icon-mobile { --btn-pad-x: 1.1rem; width: auto; }
+}
+
+/* Hamburger: two bars morph into an X. */
+.nav-toggle {
+  position: relative;
+  width: var(--tap);
+  height: var(--tap);
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.nav-toggle:active { background: var(--surface-hover); }
+.nav-toggle__bars, .nav-toggle__bars::before {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.nav-toggle__bars { transform: translateY(-3px); }
+.nav-toggle__bars::before { content: ""; transform: translateY(6px); }
+.nav-toggle[aria-expanded="true"] .nav-toggle__bars { transform: translateY(0) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] .nav-toggle__bars::before { transform: rotate(-90deg); }
+
+/* 6b. Mobile drawer. Always dark (it overlays everything). */
+.nav-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--header-h) + var(--space-3)) var(--gutter) var(--space-5);
+  background: var(--ink);
+  color: var(--chalk);
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-2%);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), visibility 0s linear var(--dur-base);
+}
+.nav-drawer.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), visibility 0s;
+}
+.nav-drawer__list { list-style: none; padding: 0; display: grid; gap: var(--space-0); }
+.nav-drawer__list a {
+  display: flex;
+  align-items: center;
+  min-height: 3.5rem;
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-line);
+}
+.nav-drawer__list a[aria-current="page"] { color: var(--ash); }
+.nav-drawer__foot { margin-top: auto; padding-top: var(--space-4); display: grid; gap: var(--space-2); }
+.nav-drawer__foot .btn { width: 100%; }
+body.nav-open { overflow: hidden; }
+/* While drawer is open the header must sit above it, on ink. */
+body.nav-open .site-header { z-index: calc(var(--z-drawer) + 1); }
+@media (min-width: 64em) { .nav-drawer { display: none; } }
+
+/* 6c. Footer: dense dark glass (the logo's own ground, scene barely through) */
+.site-footer {
+  background: var(--glass-strong);
+  color: var(--chalk);
+  border-top: 1px solid var(--glass-line);
+  padding-block: var(--space-6) var(--space-4);
+  /* leave room for the mobile bottom bar so nothing hides under it */
+  padding-bottom: calc(var(--space-4) + var(--bottombar-h) + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 48em) {
+  .site-footer { padding-bottom: var(--space-4); }
+}
+.site-footer__grid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 48em) {
+  .site-footer__grid { grid-template-columns: 1.4fr 1fr 1fr; gap: var(--space-4); }
+}
+.site-footer__brand img { width: 7.5rem; height: 7.5rem; object-fit: contain; }
+.site-footer__brand p { color: var(--mist); margin-top: var(--space-2); max-width: 34ch; }
+/* City / hours / reply time: owner facts not on file yet, so each line shows
+   neutral wording plus a visible "To be confirmed" flag (see footer.html). */
+.site-footer__facts { display: grid; gap: var(--space-1); margin: var(--space-3) 0 0; font-size: var(--step--1); }
+.site-footer__facts > div { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-0) var(--space-1); }
+.site-footer__facts dt { font-weight: 700; color: var(--chalk); }
+.site-footer__facts dt::after { content: ":"; }
+.site-footer__facts dd { margin: 0; color: var(--mist); }
+.site-footer__facts .ph-tag { margin-left: 0; }
+.site-footer__title {
+  font-family: var(--font-body);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: var(--space-2);
+}
+.site-footer__list { list-style: none; padding: 0; display: grid; gap: var(--space-0); }
+/* Direct children only. A descendant `span` selector also hit the per-letter
+   spans of .link-swap, stretching them to 44px so the hidden duplicate glyph
+   (text-shadow one line below) became visible: "AAllll ttrriippss". */
+.site-footer__list > li > a, .site-footer__list > li > span { display: inline-flex; align-items: center; min-height: var(--tap); }
+.site-footer__social { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
+.site-footer__base {
+  margin-top: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--glass-line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  justify-content: space-between;
+  color: var(--mist);
+  font-size: var(--step--1);
+}
+.site-footer__base a { color: var(--mist); display: inline-flex; align-items: center; min-height: var(--tap); }
+.site-footer__base a:hover { color: var(--chalk); }
+
+/* 6d. Mobile sticky bottom bar: the thumb-zone CTA. Hidden >= 768px where
+   the header CTA is always in reach. Slides in after the first scroll so it
+   never covers the hero CTA on load. */
+.bottom-bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--z-bottombar);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom, 0px));
+  background: var(--glass-strong);
+  /* blur only: saturate(0) turned photos passing under the bar grey */
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--glass-line);
+  color: var(--chalk);
+  transform: translateY(110%);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.bottom-bar.is-visible { transform: none; }
+.bottom-bar .btn { flex: 1; }
+/* Call stays a 48px circle; WhatsApp and Plan my trip share the rest. */
+.bottom-bar .btn--icon { flex: 0 0 auto; }
+.bottom-bar .btn:not(.btn--icon) { --btn-pad-x: 0.75rem; min-width: 0; }
+.bottom-bar .bottom-bar__wa { gap: 0.4em; }
+@media (min-width: 48em) { .bottom-bar { display: none; } }
+@media (max-width: 47.99em) {
+  body:not([data-no-bottombar]) { padding-bottom: calc(var(--bottombar-h) + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* 6e. Floating WhatsApp.
+   A floating disc can only avoid card content where there is an empty gutter
+   beside the container: from 1400px the 56px disc sits right of the content
+   column (container edge = (100vw + 76rem) / 2). Below that, WhatsApp lives in
+   the header (.header-wa, 48px, always on screen) and in the drawer, so the
+   disc is hidden instead of floating over cards, prices and CTAs. */
+.wa-fab {
+  position: fixed;
+  right: var(--space-4);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-fab);
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+@media (max-width: 87.49em) { .wa-fab { display: none !important; } }
+body.footer-in-view .wa-fab { opacity: 0; pointer-events: none; }
+body.nav-open .wa-fab, body.nav-open .bottom-bar { visibility: hidden; }
+
+/* Content under the fixed header: pages whose first section is not a
+   full-bleed hero add .has-header-offset to <main>. */
+.has-header-offset { padding-top: var(--header-h); }
+
+/* 7. Reduced motion -------------------------------------------------------- */
+/* Everything still works, but nothing travels: transitions collapse to near
+   zero so state changes are instant colour/opacity swaps. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.site-footer__brand p, .site-footer__location, .site-footer__demo,
+.site-footer__base, .site-footer__base a { color: var(--chalk-line); font-size: max(0.875rem, var(--step--1)); }
+.site-footer__location { margin-top: var(--space-2); }
+/* Privacy + terms already sit in the footer base line; hide the repeat in the
+   "Talk to us" column so the footer lists each link once. */
+.site-footer__list > li:has(> a[href$="privacy.html"]),
+.site-footer__list > li:has(> a[href$="terms.html"]) { display: none; }
+.site-footer__base p { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-1); }
+/* Phones: focused or anchored content must clear the fixed bottom bar. */
+@media (max-width: 47.99em) { html { scroll-padding-bottom: calc(var(--bottombar-h) + var(--space-2)); } }
+@media (max-width: 47.99em) {
+  .bottom-bar { gap: var(--space-2); }
+  .bottom-bar .bottom-bar__wa { flex: 0 0 auto; }
+  .bottom-bar .btn:last-child { flex: 1; }
+}

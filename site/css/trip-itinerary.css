@@ -1,0 +1,159 @@
+/* ==========================================================================
+   Trip detail: "About the trip" day-by-day timeline (js/trip-itinerary.js)
+   Layout follows the reference: centred title between hairlines, story + key facts on the left,
+   a vertical timeline on the right with days alternating sides. Each day has a big caps title,
+   a few short dash lines and a small overlapping photo cluster on the opposite side.
+   Red is used only for the dashes, links and small labels (dark ground, contrast >= 5:1).
+   Mobile first: one column, rail on the left, photos in a scrollable row under each day.
+   ========================================================================== */
+
+section.tl {
+  --tl-red: #ef4444;
+  --tl-ink: #0b0909;
+  --tl-line: rgba(255, 255, 255, 0.3);
+  --tl-text: #dcdcdc;
+  padding-block: var(--space-6);
+  background:
+    radial-gradient(48rem 26rem at 0% 18%, rgba(190, 28, 40, 0.2), transparent 70%),
+    radial-gradient(40rem 24rem at 100% 85%, rgba(190, 28, 40, 0.12), transparent 70%),
+    rgba(9, 7, 7, 0.94);
+}
+section.tl[hidden] { display: none; }
+
+/* Title between two hairlines */
+.tl__head { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2.5rem); margin: 0 0 var(--space-5); }
+.tl__head::before, .tl__head::after { content: ""; flex: 1; height: 1px; background: var(--tl-line); }
+.tl__title {
+  margin: 0;
+  font-size: clamp(2.2rem, 1.2rem + 4.6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #e8e8e8;
+}
+
+.tl__grid { display: grid; gap: var(--space-5); }
+
+/* Left column: story + key facts */
+.tl__story { display: grid; gap: var(--space-3); align-content: start; max-width: 26rem; }
+.tl__story p { margin: 0; color: var(--tl-text); font-size: 0.98rem; line-height: 1.75; }
+.tl__covers span, .tl__enjoy { color: var(--tl-red); }
+.tl__story .tl__eyebrow { display: flex; align-items: center; gap: 0.6rem; margin-top: var(--space-2); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--tl-red); }
+.tl__eyebrow::before { content: ""; width: 1.4rem; height: 2px; background: currentColor; }
+.tl__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; margin: 0; }
+.tl__facts > div { min-width: 0; padding: 0.85rem 1rem; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 0.7rem; background: #0f0d0d; }
+.tl__facts dt { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #9a9a9a; }
+.tl__facts dd { margin: 0.35rem 0 0; font-size: 0.95rem; font-weight: 700; color: #fff; overflow-wrap: anywhere; }
+
+/* Timeline: rail on the left (phones) */
+.tl__days { position: relative; display: grid; margin: 0; padding: 0; list-style: none; }
+.tl__days::before { content: ""; position: absolute; top: 0.9rem; bottom: 0; left: 1.3rem; width: 2px; background: var(--tl-line); }
+
+.tl-day {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  column-gap: var(--space-1);
+  row-gap: var(--space-2);
+  padding-bottom: var(--space-5);
+}
+.tl-day__dot {
+  grid-column: 1; grid-row: 1;
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 1.7rem; height: 1.7rem;
+  margin-top: 0.05rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--tl-ink);
+  box-shadow: 0 0 0 5px var(--tl-ink);
+}
+.tl-day__dot::after { content: ""; position: absolute; inset: 0.3rem; border-radius: 50%; background: #fff; }
+.tl-day__text { grid-column: 2; grid-row: 1; min-width: 0; }
+.tl-day__num { margin: 0; font-size: 0.85rem; font-weight: 500; color: #b8b8b8; }
+.tl-day__title {
+  margin: 0.15rem 0 var(--space-2);
+  font-size: clamp(1.7rem, 1.35rem + 1.1vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: #f2f2f2;
+}
+.tl-day__list { display: grid; gap: 0.55rem; margin: 0; padding: 0; list-style: none; font-size: 0.95rem; line-height: 1.4; color: var(--tl-text); }
+.tl-day__list li::before { content: "\2014\00a0"; color: var(--tl-red); }
+
+/* Photos: scrollable row on phones */
+.tl-photos {
+  grid-column: 2; grid-row: 2;
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.15rem 0 0.4rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.tl-photos::-webkit-scrollbar { display: none; }
+.tl-photos > * {
+  flex: none;
+  width: 7.2rem; height: 5.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.4rem;
+  object-fit: cover;
+  background: #161212;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  scroll-snap-align: start;
+}
+
+/* Rise-in as each day scrolls in (class set by JS only when motion is allowed). Days stay fully
+   visible before they animate, so full-page captures, print and slow devices always show the plan. */
+.tl.is-anim .tl-day { transform: translateY(1rem); transition: transform 600ms var(--ease-out); }
+.tl.is-anim .tl-day.is-in { transform: none; }
+@media (prefers-reduced-motion: reduce) { .tl.is-anim .tl-day { transform: none; transition: none; } }
+
+/* Laptop: story left, centred rail with alternating days */
+@media (min-width: 64em) {
+  .tl__grid { grid-template-columns: minmax(0, 21rem) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  .tl__days::before { left: 50%; margin-left: -1px; }
+  .tl-day {
+    grid-template-columns: minmax(0, 1fr) 3.6rem minmax(0, 1fr);
+    column-gap: 0;
+    row-gap: 0;
+    min-height: 15rem;
+    padding-bottom: var(--space-4);
+  }
+  .tl-day__dot { grid-column: 2; grid-row: 1; margin-top: 0.15rem; }
+  .tl-day__text { grid-column: 1; grid-row: 1; padding-right: var(--space-1); text-align: right; }
+  .tl-day__title { text-wrap: pretty; }
+  .tl-day__list li::before { content: "\2014\00a0"; }
+
+  .tl-photos {
+    grid-column: 3; grid-row: 1;
+    position: relative;
+    justify-self: start;
+    width: 16.6rem; height: 10.2rem;
+    margin-left: var(--space-1);
+    padding: 0;
+    overflow: visible;
+  }
+  .tl-photos > * { position: absolute; width: 8rem; height: 6.1rem; }
+  .tl-photos > :nth-child(1) { left: 0; top: 0; }
+  .tl-photos > :nth-child(2) { left: 5rem; top: 3.9rem; width: 7.3rem; }
+  .tl-photos--3 > :nth-child(2) { left: 9.9rem; top: 1.2rem; width: 6.7rem; height: 5.4rem; }
+  .tl-photos--3 > :nth-child(3) { left: 5rem; top: 3.9rem; width: 7.3rem; }
+  .tl-photos--1 > * { width: 10rem; height: 7.5rem; }
+  .tl-photos--2 { width: 12.6rem; }
+
+  .tl-day--flip .tl-day__text { grid-column: 3; padding: 0 0 0 var(--space-1); text-align: left; }
+  .tl-day--flip .tl-photos { grid-column: 1; justify-self: end; margin: 0 var(--space-1) 0 0; }
+}
+
+/* Booking card: the ready group departure to the same place (fixed price, pays online) */
+.book-card__group { display: grid; gap: var(--space-1); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+.book-card__group-title { font-weight: 800; line-height: 1.2; }
+.book-card__group .price-note { display: block; }

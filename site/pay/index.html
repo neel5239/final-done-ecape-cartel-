@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="/">
+  <meta name="robots" content="noindex">
+  <title>Payment status | Escape Cartel</title>
+  <meta name="description" content="Check the payment status of your Escape Cartel trip booking, or approve a practice payment from the demo checkout QR.">
+  <!-- /pay/ only makes sense for one order (?order=ID&t=TOKEN). A bare visit goes to the trips list. -->
+  <script>if (!/[?&]order=/.test(location.search) || !/[?&]t=/.test(location.search)) location.replace('/trips');</script>
+  <noscript><meta http-equiv="refresh" content="0; url=/trips"></noscript>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/buttons.css">
+  <link rel="stylesheet" href="/checkout/checkout.css">
+  <link rel="stylesheet" href="/css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+</head>
+<body class="pay-body" data-no-bottombar>
+  <div data-include="header"></div>
+  <!-- Return / result page for one order: shows paid, waiting or not paid, with the order and payment ids.
+       In demo mode it is also the practice "UPI app" opened by scanning the checkout QR. -->
+  <main class="bank" id="main" aria-labelledby="pay-h1">
+    <p class="eyebrow" id="pay-eyebrow">Secure checkout</p>
+    <h1 id="pay-h1">Payment status</h1>
+    <div id="app" aria-live="polite"><p class="pay-status">Checking your payment…</p></div>
+    <p class="pay-muted small">Questions about a payment? <a href="tel:+919825744110">Call 98257 44110</a> or <a href="https://wa.me/919825744110" target="_blank" rel="noopener">WhatsApp us</a>.</p>
+  </main>
+  <div data-include="footer"></div>
+  <script src="/js/core.js" defer></script>
+  <script src="/js/shop.js"></script>
+  <script>
+  (function () {
+    var app = document.getElementById('app');
+    var q = new URLSearchParams(location.search);
+    var id = q.get('order'), t = q.get('t');
+    if (!id || !t) return; // redirected in <head>
+    var checkoutUrl = '/checkout?order=' + encodeURIComponent(id) + '&t=' + encodeURIComponent(t);
+    var qs = '?t=' + encodeURIComponent(t);
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    function msg(d) { return typeof d.error === 'string' ? d.error : (d.error && d.error.message) || ''; }
+    function heading(eyebrow, h1) { document.getElementById('pay-eyebrow').textContent = eyebrow; document.getElementById('pay-h1').textContent = h1; }
+    function ids(s) {
+      return '<div class="pay-card"><div class="pay-row"><span class="pay-muted">Amount</span><strong>' + Shop.money(s.amount, s.currency) + '</strong></div>' +
+        '<div class="pay-row"><span class="pay-muted">Order id</span><span class="pay-mono">' + esc(String(s.orderId || id).toUpperCase()) + '</span></div>' +
+        (s.reference ? '<div class="pay-row"><span class="pay-muted">Payment id</span><span class="pay-mono">' + esc(s.reference) + '</span></div>' : '') + '</div>';
+    }
+    function result(kind, title, text, s, actions) {
+      var icon = kind === 'ok' ? '<div class="pay-tick" aria-hidden="true">✓</div>' : kind === 'wait' ? '<div class="pay-tick wait" aria-hidden="true">…</div>' : '<div class="pay-tick wait" aria-hidden="true">!</div>';
+      app.innerHTML = '<div class="pay-card pay-result ' + (kind === 'ok' ? 'ok' : '') + '">' + icon + '<h2>' + esc(title) + '</h2><p class="pay-muted">' + esc(text) + '</p></div>' +
+        (s ? ids(s) : '') + '<div class="pay-actions">' + (actions || '') + '</div>';
+    }
+    var toCheckout = function (label) { return '<a class="pay-btn" href="' + checkoutUrl + '">' + esc(label) + '</a>'; };
+    var toTrips = '<a class="pay-btn ghost" href="/trips">See more trips</a>';
+
+    // One key per page view, so a double tap cannot settle the order twice.
+    var key = 'pay_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    async function send(outcome) {
+      app.querySelectorAll('button').forEach(function (b) { b.disabled = true; b.setAttribute('aria-busy', 'true'); });
+      try {
+        var r = await fetch('/api/pay/demo', { method: 'POST', headers: { 'content-type': 'application/json', 'Idempotency-Key': key }, body: JSON.stringify({ orderId: id, t: t, outcome: outcome, method: 'upi' }) });
+        var d = await r.json().catch(function () { return {}; });
+        if (!r.ok) return result('fail', 'Could not pay', msg(d) || 'Please try again.', null, toCheckout('Back to checkout'));
+        if (d.status === 'paid') { heading('Demo payment successful', 'Payment received'); result('ok', 'Paid ' + Shop.money(d.amount, d.currency), 'Done. The checkout screen on your computer updates by itself now.', d, toTrips); }
+        else { heading('Payment not completed', 'Payment declined'); result('fail', 'Payment declined', 'Nothing was charged. Go back to the checkout to try again.', d, toCheckout('Try again')); }
+      } catch (e) {
+        result('fail', 'No connection', 'Check your internet connection and try again.', null, toCheckout('Back to checkout'));
+      }
+    }
+
+    function render(cfg, s) {
+      if (s.status === 'paid') { heading(cfg.mode === 'demo' ? 'Demo payment successful' : 'Payment successful', 'Payment received'); return result('ok', "You're booked", 'Your payment is recorded. Keep the order id and payment id for your records.', s, toTrips); }
+      if (s.status === 'verifying') { heading('Payment sent for checking', 'Checking your payment'); return result('wait', 'Being confirmed', 'The owner confirms UPI payments by hand. You will get a message once it is confirmed.', s, toTrips); }
+      if (s.status === 'refunded' || s.status === 'cancelled') { heading('Order closed', s.status === 'refunded' ? 'Order refunded' : 'Order cancelled'); return result('fail', s.status === 'refunded' ? 'This order was refunded' : 'This order was cancelled', 'It can no longer be paid. Book again from the trips page.', s, toTrips); }
+      if (cfg.mode === 'demo') {
+        // Practice "UPI app": opened by scanning the demo QR or tapping "Open UPI app" in checkout.
+        heading('Secure checkout · practice payment', 'Approve practice payment');
+        app.innerHTML = '<p class="pay-demo" role="note"><strong>Demo mode.</strong> No real money moves.</p>' +
+          '<div class="bank-top"><i aria-hidden="true">₹</i> Paying ' + esc(cfg.business) + '</div>' +
+          '<div class="pay-card"><p class="pay-muted">Amount</p><p class="bank-amount">' + Shop.money(s.amount, s.currency) + '</p><p class="pay-muted small">Order ' + esc(String(s.orderId || id).slice(-10).toUpperCase()) + '</p></div>' +
+          '<button class="pay-btn big" type="button" id="ok">Pay ' + Shop.money(s.amount, s.currency) + '</button><button class="pay-link" type="button" id="no">Decline</button>';
+        document.getElementById('ok').onclick = function () { send('success'); };
+        document.getElementById('no').onclick = function () { send('failed'); };
+        return;
+      }
+      if (s.paymentStatus === 'failed' || s.status === 'failed') { heading('Payment not completed', "Payment didn't go through"); return result('fail', 'Not paid yet', 'No money was taken, or any deducted amount comes back automatically. Try again on the checkout page.', s, toCheckout('Try again')); }
+      heading('Waiting for payment', 'Payment in progress');
+      result('wait', 'Waiting for your bank or UPI app', 'If you approved the payment, this page updates by itself within a minute.', s, toCheckout('Open checkout'));
+      setTimeout(load, 4000);
+    }
+
+    function load() {
+      Promise.all([
+        fetch('/api/pay/config').then(function (r) { return r.json(); }),
+        fetch('/api/pay/status/' + encodeURIComponent(id) + qs).then(function (r) { return r.ok ? r.json() : null; }),
+      ]).then(function (res) {
+        if (!res[1]) { heading('Payment status', 'Order not found'); return result('fail', 'We could not find that order', 'This payment link is not valid or has expired. Book again from the trips page.', null, toTrips); }
+        render(res[0], res[1]);
+      }).catch(function () { result('fail', 'Could not load', 'Check your internet connection, then refresh this page.', null, toCheckout('Open checkout')); });
+    }
+    load();
+  })();
+  </script>
+</body>
+</html>

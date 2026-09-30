@@ -1,0 +1,473 @@
+/* ==========================================================================
+   Escape Cartel — Owner trip creator (/owner/create/, owner only)
+   Load order: tokens.css -> base.css -> buttons.css -> info.css -> create.css
+   Contents:
+   1. Page shell + owner bar
+   2. Gate (login / locked)
+   3. Layout: step rail + form
+   4. Step cards
+   5. Pickup radio cards, dates
+   6. Photo picker
+   7. Day-by-day route spine (the signature: each day is a stop on one line)
+   8. Review, actions, success, own-trip list
+   9. Reduced motion / forced colours
+   Reuses .lead-form, .field, .field-error, .form-status from info.css.
+   ========================================================================== */
+
+/* 1. Page shell + owner bar ------------------------------------------------ */
+.owner-page {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, rgba(255, 255, 255, 0.07), transparent 70%),
+    var(--ink);
+}
+.owner-page main { padding-bottom: var(--space-7); }
+.owner-page main:focus { outline: none; }
+
+.oc-bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  border-bottom: 1px solid var(--line);
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+.oc-bar__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 4rem; }
+.oc-bar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap);
+  font-weight: 800;
+  font-size: var(--step--1);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.oc-bar__brand img { width: 2.5rem; height: 2.5rem; object-fit: contain; }
+.oc-bar__nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0 var(--space-2); }
+.oc-bar__nav a, .oc-bar__logout {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+@media (hover: hover) { .oc-bar__nav a:hover, .oc-bar__logout:hover { color: var(--fg); } }
+@media (max-width: 30em) { .oc-bar__nav a[href="/admin/"] { display: none; } }
+
+/* 2. Gate ------------------------------------------------------------------ */
+.oc-gate { display: grid; place-items: center; min-height: 70vh; padding-block: var(--space-6); }
+.oc-gate__card {
+  display: grid;
+  gap: var(--space-3);
+  width: min(100%, 28rem);
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+@media (min-width: 40em) { .oc-gate__card { padding: var(--space-5); } }
+.oc-gate__card h1 { margin-top: var(--space-1); }
+.oc-gate__card .btn { justify-self: start; }
+
+/* 3. Layout ---------------------------------------------------------------- */
+.oc-head { padding-block: var(--space-5) var(--space-4); display: grid; gap: var(--space-2); }
+.oc-head h1 { font-size: var(--step-5); }
+.oc-note {
+  padding: var(--space-2);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  font-size: var(--step--1);
+}
+.oc-note strong { color: var(--fg); }
+
+.oc-layout { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); align-items: start; }
+
+/* Step rail: horizontal chips stuck under the bar on phones, a sticky column on desktop. */
+.oc-rail {
+  position: sticky;
+  top: 4rem;
+  z-index: var(--z-raised);
+  margin-inline: calc(var(--gutter) * -1);
+  padding: var(--space-1) var(--gutter);
+  background: var(--glass-strong);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.oc-rail::-webkit-scrollbar { display: none; }
+.oc-rail ol { display: flex; gap: var(--space-1); margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.oc-rail li { counter-increment: step; flex-shrink: 0; }
+.oc-rail a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap);
+  padding: 0 var(--space-2) 0 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.oc-rail__dot {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  font-variant-numeric: tabular-nums;
+}
+.oc-rail__dot::before { content: counter(step); }
+.oc-rail a[aria-current="step"] { color: var(--fg); border-color: var(--fg); }
+.oc-rail a.is-done { color: var(--fg); }
+.oc-rail a.is-done .oc-rail__dot { background: var(--chalk); border-color: var(--chalk); color: var(--ink); }
+.oc-rail a.is-done .oc-rail__dot::before { content: "✓"; font-weight: 800; }
+@media (hover: hover) { .oc-rail a:hover { color: var(--fg); border-color: var(--line-strong); } }
+
+@media (min-width: 64em) {
+  .oc-layout { grid-template-columns: 14rem minmax(0, 1fr); gap: var(--space-6); }
+  .oc-rail {
+    top: calc(4rem + var(--space-4));
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    overflow: visible;
+  }
+  .oc-rail ol { flex-direction: column; gap: 0; position: relative; }
+  /* The rail's own line echoes the day spine. */
+  .oc-rail ol::before { content: ""; position: absolute; left: calc(0.4rem + 0.95rem); top: 1.4rem; bottom: 1.4rem; width: 1px; background: var(--line); }
+  .oc-rail a { position: relative; border-color: transparent; padding-block: var(--space-0); min-height: 3.25rem; }
+  .oc-rail__dot { background: var(--ink); }
+}
+
+.oc-form { display: grid; gap: var(--space-4); min-width: 0; }
+
+/* 4. Step cards ------------------------------------------------------------ */
+.oc-step {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  scroll-margin-top: calc(4rem + 4rem);
+}
+@media (min-width: 48em) { .oc-step { padding: var(--space-5); } }
+@media (min-width: 64em) { .oc-step { scroll-margin-top: calc(4rem + var(--space-3)); } }
+.oc-step__head { display: flex; align-items: flex-start; gap: var(--space-2); }
+.oc-step__head h2 { font-size: var(--step-3); }
+.oc-step__head p { margin-top: var(--space-0); font-size: var(--step--1); }
+.oc-step__num {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--step-1);
+}
+.oc-count { justify-self: end; font-variant-numeric: tabular-nums; }
+
+/* Reused fields: sr-only file inputs must stay 1px even inside .field. */
+.field .oc-photo__input { width: 1px; height: 1px; min-height: 0; padding: 0; border: 0; }
+
+/* 5. Pickup radio cards, dates -------------------------------------------- */
+.pickup { border: 0; padding: 0; margin: 0; min-width: 0; }
+.pickup legend { padding: 0; margin-bottom: var(--space-1); font-weight: 700; font-size: var(--step--1); letter-spacing: 0.02em; }
+.pickup__opts { display: grid; gap: var(--space-1); grid-template-columns: minmax(0, 1fr); }
+.pickup__opt { position: relative; display: block; cursor: pointer; }
+.pickup__opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.pickup__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 3rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  font-weight: 700;
+  font-size: var(--step--1);
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.pickup__dot { flex-shrink: 0; width: 1.25rem; height: 1.25rem; border: 2px solid var(--line-strong); border-radius: 50%; display: grid; place-items: center; }
+.pickup__dot::after { content: ""; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--fg); transform: scale(0); transition: transform var(--dur-fast) var(--ease-out); }
+.pickup__opt input:checked + .pickup__card { border-color: var(--fg); background: var(--ink-raised); }
+.pickup__opt input:checked + .pickup__card .pickup__dot { border-color: var(--fg); }
+.pickup__opt input:checked + .pickup__card .pickup__dot::after { transform: scale(1); }
+.pickup__opt input:focus-visible + .pickup__card { outline: 3px solid var(--fg); outline-offset: 3px; }
+@media (hover: hover) { .pickup__opt:hover .pickup__card { border-color: var(--fg); } }
+.pickup.is-invalid .pickup__card { border-style: dashed; border-width: 2px; border-color: var(--fg); }
+
+.oc-dates { border: 0; padding: 0; margin: 0; min-width: 0; }
+.oc-dates legend { padding: 0; margin-bottom: var(--space-0); }
+.oc-dates__list { display: grid; gap: var(--space-1); grid-template-columns: minmax(0, 1fr); margin: var(--space-1) 0 0; padding: 0; list-style: none; }
+@media (min-width: 40em) { .oc-dates__list { grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); } }
+.oc-dates__item { display: flex; gap: var(--space-1); }
+.oc-dates__item input {
+  flex: 1;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  font-size: 1rem;
+}
+.oc-icon-btn {
+  flex-shrink: 0;
+  width: 3rem;
+  min-height: 3rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--fg-muted);
+}
+@media (hover: hover) { .oc-icon-btn:hover { color: var(--fg); border-color: var(--fg); } }
+
+.oc-add {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--tap);
+  padding: 0 var(--space-3);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: var(--step--1);
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.oc-add span[aria-hidden] { font-size: 1.2em; line-height: 1; }
+@media (hover: hover) { .oc-add:hover { border-style: solid; border-color: var(--fg); background: var(--ink-hover); } }
+
+/* 6. Photo picker ---------------------------------------------------------- */
+.oc-photo { position: relative; display: grid; gap: var(--space-1); }
+.oc-photo__drop {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-0);
+  aspect-ratio: 16 / 9;
+  padding: var(--space-2);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 10px, transparent 10px 20px),
+    var(--bg);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.oc-photo__drop svg { color: var(--fg-muted); margin-bottom: var(--space-0); }
+.oc-photo__cta { font-weight: 800; }
+.oc-photo__hint { font-size: var(--step--1); color: var(--fg-muted); max-width: 26ch; }
+@media (hover: hover) { .oc-photo__drop:hover { border-color: var(--fg); } }
+.oc-photo__drop.is-over { border-style: solid; border-color: var(--fg); background-color: var(--ink-hover); }
+.oc-photo__input:focus-visible + .oc-photo__drop { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.oc-photo.is-invalid .oc-photo__drop { border-width: 2px; border-color: var(--fg); }
+
+.oc-photo__preview { position: relative; margin: 0; border-radius: var(--radius-sm); overflow: hidden; background: var(--ink-raised); }
+.oc-photo__preview img { width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; }
+.oc-photo__meta {
+  position: absolute;
+  left: var(--space-1);
+  top: var(--space-1);
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--scrim);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.oc-photo__tools {
+  position: absolute;
+  right: var(--space-1);
+  bottom: var(--space-1);
+  display: flex;
+  gap: var(--space-1);
+}
+.oc-photo__btn {
+  min-height: var(--tap);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-pill);
+  background: var(--glass-strong);
+  font-size: var(--step--1);
+  font-weight: 700;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) { .oc-photo__btn:hover { background: var(--chalk); color: var(--ink); } }
+.oc-photo__busy { font-size: var(--step--1); font-weight: 700; color: var(--fg-muted); }
+.oc-photo--cover .oc-photo__drop { aspect-ratio: 21 / 9; }
+@media (max-width: 40em) { .oc-photo--cover .oc-photo__drop { aspect-ratio: 16 / 9; } }
+
+/* 7. Day-by-day route spine ------------------------------------------------ */
+.oc-spine { position: relative; display: grid; gap: var(--space-3); margin: 0; padding: 0 0 0 2.25rem; list-style: none; counter-reset: day; }
+.oc-spine::before {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  top: 1.5rem;
+  bottom: -1.75rem; /* runs on to the "Add day" button: the route continues */
+  border-left: 2px dashed var(--line-strong);
+}
+.oc-day { position: relative; counter-increment: day; }
+.oc-day__node {
+  position: absolute;
+  left: -2.25rem;
+  top: 0.9rem;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--chalk);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  box-shadow: 0 0 0 5px var(--ink);
+}
+.oc-day__node::before { content: counter(day); }
+.oc-day__card {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.35);
+}
+@media (min-width: 48em) { .oc-day__card { padding: var(--space-3); } }
+.oc-day__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.oc-day__label { font-size: var(--step-1); letter-spacing: -0.01em; }
+.oc-day__remove {
+  min-height: var(--tap);
+  padding: 0 var(--space-1);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+@media (hover: hover) { .oc-day__remove:hover { color: var(--fg); } }
+.oc-day__grid { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); }
+.oc-day__fields { display: grid; gap: var(--space-2); min-width: 0; }
+.oc-day__photo { align-content: start; }
+.oc-day__photo .oc-sub { margin-top: var(--space-1); font-weight: 600; color: var(--fg-muted); }
+.oc-day .field textarea { min-height: 5.5rem; }
+@media (min-width: 72em) {
+  .oc-day__grid { grid-template-columns: 17rem minmax(0, 1fr); }
+  .oc-day__photo .oc-photo__drop { aspect-ratio: 4 / 3; }
+  .oc-day__photo .oc-photo__preview img { aspect-ratio: 4 / 3; }
+}
+.oc-add--day { position: relative; margin-left: 2.25rem; border-style: solid; border-color: var(--fg); }
+.oc-add--day::before {
+  content: "";
+  position: absolute;
+  left: -2.25rem;
+  top: 50%;
+  width: 1.8rem;
+  height: 1.8rem;
+  translate: 0 -50%;
+  border: 2px dashed var(--line-strong);
+  border-radius: 50%;
+  background: var(--ink);
+}
+.oc-day.is-new { animation: oc-day-in var(--dur-slow) var(--ease-out) both; }
+.oc-day.is-new .oc-day__node { animation: oc-node-in var(--dur-slow) var(--ease-spring) both; }
+@keyframes oc-day-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes oc-node-in { from { transform: scale(0.2); } }
+
+/* 8. Review, actions, success, own trips ---------------------------------- */
+.oc-review { display: grid; gap: 0; margin: 0; }
+.oc-review > div {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, auto) minmax(0, 1fr);
+  gap: var(--space-2);
+  padding-block: var(--space-1);
+  border-bottom: 1px solid var(--line);
+}
+.oc-review dt { color: var(--fg-muted); font-size: var(--step--1); padding-top: 0.15em; }
+.oc-review dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+.oc-review dd.is-empty { font-weight: 500; color: var(--fg-muted); }
+.oc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.oc-actions .btn { flex: 1 1 14rem; }
+.oc-link {
+  min-height: var(--tap);
+  padding: 0 var(--space-1);
+  font-weight: 700;
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+@media (hover: hover) { .oc-link:hover { color: var(--fg); } }
+
+.create-success {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--fg);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  scroll-margin-top: calc(4rem + var(--space-3));
+}
+.create-success:focus { outline: none; }
+.create-success:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+@media (min-width: 48em) { .create-success { padding: var(--space-5); } }
+.create-success__icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: var(--chalk); color: var(--ink); }
+.create-success__icon svg { width: 1.7rem; height: 1.7rem; }
+.create-success__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); width: 100%; margin-top: var(--space-1); }
+.create-success__actions .btn { flex: 1 1 14rem; }
+
+.oc-mine { margin-top: var(--space-6); display: grid; gap: var(--space-2); }
+.oc-mine h2:focus { outline: none; }
+.oc-mine__list { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+.oc-mine__item {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.oc-mine__item img { width: 5rem; height: 3.5rem; object-fit: cover; border-radius: calc(var(--radius-md) - var(--space-1)); }
+.oc-mine__text { display: grid; min-width: 0; }
+.oc-mine__text span { font-size: var(--step--1); }
+.oc-mine__tools { grid-column: 1 / -1; display: flex; gap: var(--space-1); justify-content: flex-end; }
+.oc-mine__tools .oc-photo__btn { background: transparent; border-color: var(--line-strong); }
+@media (min-width: 40em) {
+  .oc-mine__item { grid-template-columns: 6rem minmax(0, 1fr) auto; }
+  .oc-mine__item img { width: 6rem; height: 4rem; }
+  .oc-mine__tools { grid-column: auto; }
+}
+.oc-mine__empty { padding: var(--space-3); border: 1px dashed var(--line-strong); border-radius: var(--radius-md); color: var(--fg-muted); }
+
+/* 9. Reduced motion / forced colours -------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .oc-day.is-new, .oc-day.is-new .oc-day__node { animation: none; }
+  .pickup__card, .pickup__dot::after, .oc-rail a, .oc-add, .oc-photo__drop, .oc-photo__btn { transition: none; }
+}
+@media (forced-colors: active) {
+  .oc-step, .oc-day__card, .pickup__card, .create-success, .oc-photo__drop, .oc-gate__card { border: 1px solid CanvasText; }
+  .oc-day__node, .oc-rail a.is-done .oc-rail__dot { forced-color-adjust: none; background: CanvasText; color: Canvas; }
+  .pickup__opt input:checked + .pickup__card { border-width: 3px; }
+}

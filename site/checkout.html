@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Checkout: pay for your group trip | Escape Cartel</title>
+  <meta name="description" content="Final step of your Escape Cartel group-trip booking: check the trip summary and amount, then pay by UPI, Google Pay, net banking or card.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/images/logo/apple-touch-icon.png">
+  <link rel="preload" href="/vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://checkout.razorpay.com">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/buttons.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="/css/bg.css">
+  <link rel="stylesheet" href="/css/checkout.css">
+  <!-- Same page-transition opt-in as every other page, so navigations never half-start a transition. -->
+  <link rel="stylesheet" href="/css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+</head>
+<body data-no-bottombar>
+  <div data-include="header"></div>
+
+  <!-- Filled from /api/pay/config: "Demo mode" (no keys) or "Razorpay test mode". Hidden for live payments. -->
+  <p class="demo-banner" id="mode-banner" role="note" hidden>
+    <strong id="mode-tag">DEMO</strong> <span id="mode-text">Demo mode: no real money moves on this page.</span>
+  </p>
+
+  <main id="main" class="checkout" data-theme="dark">
+    <div class="container checkout__wrap">
+      <header class="checkout__head">
+        <span class="eyebrow" id="checkout-step">Step 3 of 3</span>
+        <h1 id="checkout-title">Confirm and pay</h1>
+        <ol class="stepper" id="checkout-progress" aria-label="Booking progress">
+          <li class="stepper__step is-done"><span class="stepper__dot" aria-hidden="true">1</span><span>Choose<span class="sr-only"> (done)</span></span></li>
+          <li class="stepper__step is-done"><span class="stepper__dot" aria-hidden="true">2</span><span>Details<span class="sr-only"> (done)</span></span></li>
+          <li class="stepper__step is-current" aria-current="step"><span class="stepper__dot" aria-hidden="true">3</span><span>Pay</span></li>
+        </ol>
+      </header>
+
+      <!-- First paint: loading the booking and the payment settings -->
+      <section class="co-state co-loading ink-panel" id="co-loading" aria-labelledby="loading-title" aria-busy="true">
+        <span class="co-spinner" aria-hidden="true"></span>
+        <h2 id="loading-title">Loading your booking…</h2>
+        <p class="co-note">Getting the trip, the amount and the ways to pay.</p>
+      </section>
+
+      <!-- Step 2: seats + one card per traveller (traveller 1 is the primary contact), trip summary on the right -->
+      <section class="co-state bk" id="co-start" hidden aria-labelledby="start-title">
+        <div class="bk__grid">
+          <form id="start-form" class="bk__form" novalidate>
+            <p class="eyebrow">Step 2 of 3 · Traveller details</p>
+            <h2 id="start-title">Who's coming?</h2>
+            <p class="bk-hint" id="start-trip"></p>
+
+            <div class="bk-field">
+              <span class="bk-label" id="seats-label">Number of seats</span>
+              <div class="bk-seats" role="group" aria-labelledby="seats-label">
+                <button class="bk-seats__btn" type="button" id="seats-minus" aria-label="One traveller less">−</button>
+                <output class="bk-seats__count" id="seats-count" aria-live="polite" aria-labelledby="seats-label">1</output>
+                <button class="bk-seats__btn" type="button" id="seats-plus" aria-label="Add a traveller">+</button>
+              </div>
+              <p class="bk-hint" id="seats-hint">Max 6 per booking</p>
+            </div>
+
+            <div class="bk-travellers" id="travellers"></div>
+
+            <div class="bk-row">
+              <div class="bk-field">
+                <label class="bk-label" for="start-pickup">Pickup point</label>
+                <select class="bk-input" id="start-pickup" name="pickup" aria-describedby="start-pickup-error"></select>
+                <p class="field-error" id="start-pickup-error"></p>
+              </div>
+              <div class="bk-field">
+                <label class="bk-label" for="start-notes">Anything we should know?</label>
+                <input class="bk-input" id="start-notes" name="notes" maxlength="300" autocomplete="off" placeholder="Food allergies, vegetarian meals, who you want to room with…">
+              </div>
+            </div>
+
+            <label class="bk-budget"><input id="start-budget" type="checkbox" aria-describedby="start-budget-error"> <span id="start-budget-label">I can pay the full trip budget.</span></label>
+            <p class="field-error" id="start-budget-error"></p>
+            <p class="field-error bk-formerr" id="start-error" role="alert"></p>
+
+            <div class="bk-actions">
+              <a class="bk-back" href="/trips" id="start-back">Read the itinerary again</a>
+              <button class="bk-submit" type="submit">Continue to payment <span aria-hidden="true">→</span></button>
+            </div>
+          </form>
+
+          <aside class="bk-sum" aria-labelledby="bk-sum-title">
+            <img class="bk-sum__img" id="bk-sum-img" src="" alt="" width="1280" height="800" decoding="async" hidden>
+            <h3 class="bk-sum__title" id="bk-sum-title"></h3>
+            <p class="bk-sum__meta" id="bk-sum-meta"></p>
+            <div class="bk-sum__who">
+              <p class="bk-sum__label">Travellers</p>
+              <!-- One line per traveller, updated live as names are typed (filled by /js/checkout.js) -->
+              <ol class="co-trav bk-sum__trav" id="bk-sum-trav" aria-live="polite"></ol>
+            </div>
+            <dl class="bk-sum__rows">
+              <div><dt id="bk-sum-line"></dt><dd id="bk-sum-sub"></dd></div>
+              <div><dt>Convenience fee</dt><dd class="bk-sum__free">₹0</dd></div>
+              <div><dt>Taxes</dt><dd>Included</dd></div>
+              <div class="bk-sum__total"><dt>Total</dt><dd id="bk-sum-total" aria-live="polite"></dd></div>
+            </dl>
+            <p class="bk-sum__note"><span aria-hidden="true">🔒</span> No hidden charges. The total here is exactly what you pay.</p>
+            <div class="bk-sum__pay">
+              <p class="bk-sum__label">Next: pay securely with</p>
+              <ul class="bk-sum__methods" role="list">
+                <li>UPI <small>ID, QR or app</small></li>
+                <li>Google Pay</li>
+                <li>Net banking</li>
+                <li>Cards</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Booking link missing or invalid -->
+      <section class="co-state ink-panel" id="co-missing" hidden aria-labelledby="missing-title" tabindex="-1">
+        <h2 id="missing-title">We couldn't find that booking</h2>
+        <p id="missing-text">This checkout link has no booking attached, or the booking was made on another phone or browser. Pick a trip and join it again to get a fresh checkout.</p>
+        <div class="cluster">
+          <a class="btn btn--primary" href="/trips"><span class="btn__label">Browse trips</span></a>
+          <a class="btn btn--liquid-fill" href="https://wa.me/919825744110" data-wa target="_blank" rel="noopener"><span class="btn__label">Ask on WhatsApp</span></a>
+        </div>
+      </section>
+
+      <div class="checkout__grid" id="co-main" hidden>
+        <!-- Order summary -->
+        <section class="co-summary ink-panel" aria-labelledby="summary-title">
+          <h2 id="summary-title">Your trip</h2>
+          <p class="co-summary__trip" id="s-title"></p>
+          <dl class="co-list" id="s-list">
+            <div data-row="dest"><dt>Destination</dt><dd id="s-dest"></dd></div>
+            <div data-row="date"><dt>Date</dt><dd id="s-date"></dd></div>
+            <div data-row="name"><dt id="s-name-label">Traveller</dt><dd id="s-name"></dd></div>
+            <div data-row="price" hidden><dt>Price</dt><dd id="s-price"></dd></div>
+            <div data-row="travellers" hidden><dt id="s-trav-label">Travellers</dt><dd><ol class="co-trav" id="s-travellers"></ol></dd></div>
+            <div data-row="pickup"><dt>Pickup point</dt><dd id="s-pickup"></dd></div>
+            <div data-row="drop"><dt>Drop</dt><dd id="s-drop"></dd></div>
+            <div data-row="ref"><dt>Booking ref</dt><dd id="s-ref" class="co-mono"></dd></div>
+          </dl>
+          <div class="co-total">
+            <span>Total to pay</span>
+            <strong id="s-amount"></strong>
+          </div>
+          <p class="co-note" id="s-note">Full trip budget per person, all in. There are no hidden fees at payment.</p>
+          <p class="co-seats" id="s-seats"></p>
+        </section>
+
+        <!-- Payment -->
+        <section class="co-pay ink-panel" id="co-pay" aria-labelledby="pay-title">
+          <h2 id="pay-title">Pay <span id="pay-amount" class="co-pay__amt"></span></h2>
+
+          <div class="co-confirm" id="budget-box" hidden>
+            <label class="co-check">
+              <input type="checkbox" id="budget-ok">
+              <span id="budget-ok-label">I confirm I can pay the full trip budget.</span>
+            </label>
+            <p class="field-error" id="budget-err" aria-live="polite"></p>
+          </div>
+
+          <!-- Method chooser + panels (hidden while a UPI request is waiting) -->
+          <div id="pm-choose">
+            <p class="pm__label" id="pm-label">Choose how to pay</p>
+            <div class="pm" role="radiogroup" aria-labelledby="pm-label">
+              <label class="pm__opt">
+                <input type="radio" name="method" value="upi" checked>
+                <span class="pm__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z"/><path d="m10 9 2.5 3-2.5 3M13.5 9l2 3-2 3"/></svg></span>
+                <span class="pm__text"><span class="pm__name">UPI</span><span class="pm__sub">UPI ID, QR or any UPI app</span></span>
+              </label>
+              <label class="pm__opt">
+                <input type="radio" name="method" value="gpay">
+                <span class="pm__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M15.5 14.5h2.5"/></svg></span>
+                <span class="pm__text"><span class="pm__name">Google Pay</span><span class="pm__sub">Pay in the GPay app</span></span>
+              </label>
+              <label class="pm__opt">
+                <input type="radio" name="method" value="netbanking">
+                <span class="pm__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5 12 4l8.5 5.5M5 20h14M6.5 10.5V17M10 10.5V17M14 10.5V17M17.5 10.5V17"/></svg></span>
+                <span class="pm__text"><span class="pm__name">Net banking</span><span class="pm__sub">All major Indian banks</span></span>
+              </label>
+              <label class="pm__opt">
+                <input type="radio" name="method" value="card">
+                <span class="pm__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.5h19M6 15h4"/></svg></span>
+                <span class="pm__text"><span class="pm__name">Cards</span><span class="pm__sub">Debit or credit card</span></span>
+              </label>
+            </div>
+
+            <!-- UPI -->
+            <div class="pm-panel" id="panel-upi" data-panel="upi">
+              <form id="upi-form" class="pm-form" novalidate>
+                <div class="field">
+                  <label for="vpa">Your UPI ID</label>
+                  <input class="input co-mono" id="vpa" name="vpa" type="text" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="100" placeholder="yourname@okhdfcbank" aria-describedby="vpa-hint vpa-error">
+                  <p class="field-hint" id="vpa-hint">We send a payment request to this UPI ID. Approve it in your UPI app within 5 minutes.</p>
+                  <p class="field-error" id="vpa-error" aria-live="polite"></p>
+                  <p class="co-ok" id="vpa-ok" aria-live="polite"></p>
+                </div>
+                <button class="btn btn--primary btn--lg btn--block" type="submit" id="upi-pay"><span class="btn__label">Pay</span></button>
+              </form>
+              <p class="pm-or"><span>or</span></p>
+              <div class="pm-alt">
+                <button class="btn btn--ghost btn--block" type="button" id="upi-qr-btn"><span class="btn__label">Show QR</span></button>
+                <button class="btn btn--ghost btn--block" type="button" id="upi-intent"><span class="btn__label">Open UPI app</span></button>
+              </div>
+              <p class="field-hint" id="upi-intent-hint">Open UPI app works on a phone with GPay, PhonePe, Paytm or BHIM installed. On a computer, use Show QR.</p>
+              <!-- Direct-UPI mode only: the owner checks the UPI reference by hand -->
+              <form id="utr-form" class="pm-form" hidden novalidate>
+                <div class="field">
+                  <label for="utr">After paying, enter the UPI reference (UTR)</label>
+                  <input class="input co-mono" id="utr" name="utr" type="text" inputmode="numeric" autocomplete="off" maxlength="35" aria-describedby="utr-error">
+                  <p class="field-error" id="utr-error" aria-live="polite"></p>
+                </div>
+                <button class="btn btn--primary btn--block" type="submit" id="utr-send"><span class="btn__label">I have paid</span></button>
+              </form>
+            </div>
+
+            <!-- Google Pay -->
+            <div class="pm-panel" id="panel-gpay" data-panel="gpay" hidden>
+              <p>Opens the secure Razorpay window with Google Pay picked for you. Approve the payment in the GPay app, then come back here.</p>
+              <button class="btn btn--primary btn--lg btn--block" type="button" id="gpay-pay"><span class="btn__label">Pay with Google Pay</span></button>
+            </div>
+
+            <!-- Net banking -->
+            <div class="pm-panel" id="panel-netbanking" data-panel="netbanking" hidden>
+              <fieldset class="nb">
+                <legend class="pm__label">Popular banks</legend>
+                <div class="nb__grid" id="nb-popular"><p class="co-note">Loading banks…</p></div>
+              </fieldset>
+              <div class="field nb__search">
+                <label for="nb-q">Search all banks</label>
+                <input class="input" id="nb-q" type="search" autocomplete="off" placeholder="Type your bank name" aria-controls="nb-list" aria-describedby="nb-count">
+                <p class="field-hint" id="nb-count" aria-live="polite"></p>
+              </div>
+              <fieldset class="nb">
+                <legend class="sr-only">All banks</legend>
+                <div class="nb__list" id="nb-list" tabindex="-1"></div>
+              </fieldset>
+              <p class="field-error" id="nb-error" aria-live="polite"></p>
+              <button class="btn btn--primary btn--lg btn--block" type="button" id="nb-pay"><span class="btn__label">Choose a bank to continue</span></button>
+              <p class="field-hint">You log in on your bank's own page through Razorpay, then come straight back here.</p>
+            </div>
+
+            <!-- Cards -->
+            <div class="pm-panel" id="panel-card" data-panel="card" hidden>
+              <p>Enter your card in the secure Razorpay window. Visa, Mastercard, RuPay and Amex work. Your card number never touches our site.</p>
+              <button class="btn btn--primary btn--lg btn--block" type="button" id="card-pay"><span class="btn__label">Pay by card</span></button>
+            </div>
+          </div>
+
+          <!-- UPI waiting screen -->
+          <div class="co-wait" id="upi-wait" hidden tabindex="-1" aria-labelledby="wait-title">
+            <span class="co-spinner" id="wait-spin" aria-hidden="true"></span>
+            <h3 id="wait-title">Approve the payment in your UPI app</h3>
+            <p id="wait-text">We sent a payment request to your UPI ID.</p>
+            <figure class="co-qr" id="upi-qr" hidden>
+              <div class="co-qr__box" id="upi-qr-box"></div>
+              <figcaption id="upi-qr-cap">Scan with any UPI app to pay.</figcaption>
+            </figure>
+            <p class="co-timer"><span class="sr-only">Time left: </span><span id="wait-timer" role="timer" aria-live="off">5:00</span></p>
+            <p class="co-status" id="wait-status" role="status" aria-live="polite">Waiting for your approval…</p>
+            <div class="co-demo-sim" id="wait-demo" hidden>
+              <p class="co-note">Demo mode: pick what the UPI app should answer.</p>
+              <div class="cluster">
+                <button class="btn btn--primary btn--sm" type="button" data-demo="success"><span class="btn__label">Approve (demo)</span></button>
+                <button class="btn btn--ghost btn--sm" type="button" data-demo="failed"><span class="btn__label">Decline (demo)</span></button>
+              </div>
+            </div>
+            <div class="cluster">
+              <button class="btn btn--ghost" type="button" id="wait-cancel"><span class="btn__label">Cancel</span></button>
+              <button class="btn btn--primary" type="button" id="wait-retry" hidden><span class="btn__label">Retry</span></button>
+            </div>
+          </div>
+
+          <p class="co-status" id="pay-status" role="status" aria-live="polite"></p>
+          <div class="co-neterr" id="net-error" role="alert" hidden>
+            <p id="net-error-text">We couldn't reach our server. Check your internet connection and try again.</p>
+            <button class="btn btn--ghost btn--sm" type="button" id="net-retry"><span class="btn__label">Try again</span></button>
+          </div>
+          <p class="co-secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg> <span id="secure-text">Payments are processed by Razorpay. The amount is set by our server, not this page.</span></p>
+        </section>
+      </div>
+
+      <!-- Result screens -->
+      <section class="co-state co-result ink-panel" id="co-success" hidden aria-labelledby="success-title" tabindex="-1">
+        <span class="co-result__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="eyebrow" id="success-eyebrow">Payment successful</span>
+        <h2 id="success-title">You're in. Seat confirmed.</h2>
+        <p id="success-text"></p>
+        <dl class="co-list">
+          <div><dt>Amount paid</dt><dd id="r-amount"></dd></div>
+          <div><dt>Order id</dt><dd id="r-ref" class="co-mono"></dd></div>
+          <div><dt>Payment id</dt><dd id="r-pay" class="co-mono"></dd></div>
+          <div data-row="r-trav" hidden><dt>Travellers</dt><dd id="r-trav"></dd></div>
+          <div data-row="r-pickup"><dt>Pickup</dt><dd id="r-pickup"></dd></div>
+          <div data-row="r-seats"><dt>Seats left on this trip</dt><dd id="r-seats"></dd></div>
+        </dl>
+        <p class="co-note" id="success-note">Screenshot this page and share it with the trip group on WhatsApp.</p>
+        <div class="cluster">
+          <a class="btn btn--primary" id="r-next" href="/trips"><span class="btn__label">See your itinerary</span></a>
+          <a class="btn btn--liquid-fill" href="/trips"><span class="btn__label">See more trips</span></a>
+        </div>
+      </section>
+
+      <section class="co-state co-result ink-panel" id="co-failure" hidden aria-labelledby="failure-title" tabindex="-1">
+        <span class="co-result__icon co-result__icon--fail" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </span>
+        <span class="eyebrow">Payment not completed</span>
+        <h2 id="failure-title">Payment didn't go through</h2>
+        <p id="failure-reason">The bank declined this attempt.</p>
+        <p class="co-note">Your seat is not booked yet. If money left your account, it comes back automatically within 5 to 7 working days.</p>
+        <div class="cluster">
+          <button class="btn btn--primary" type="button" id="retry"><span class="btn__label">Try again</span></button>
+          <button class="btn btn--liquid-fill" type="button" id="switch-method"><span class="btn__label">Use another method</span></button>
+        </div>
+        <p class="co-help">Need help with the payment? <a href="tel:+919825744110">Call 98257 44110</a> or <a href="https://wa.me/919825744110" data-wa target="_blank" rel="noopener">message us on WhatsApp</a>.</p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Practice gateway, used only in demo mode (Google Pay, net banking and cards) -->
+  <div class="gw" id="gw" hidden>
+    <div class="gw__backdrop" data-gw-close></div>
+    <div class="gw__panel" role="dialog" aria-modal="true" aria-labelledby="gw-head" aria-describedby="gw-demo-note">
+      <div class="gw__top">
+        <div>
+          <p class="gw__merchant">Escape Cartel <span class="gw__tag">DEMO</span></p>
+          <h2 class="gw__title" id="gw-head">Pay <span id="gw-amount"></span></h2>
+        </div>
+        <button class="btn btn--icon btn--sm" type="button" data-gw-close aria-label="Close demo checkout">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <p class="gw__demo" id="gw-demo-note">Practice gateway. No real money is taken and no card or bank details are needed.</p>
+
+      <div class="gw__body" id="gw-form">
+        <p class="gw__method" id="gw-method"></p>
+        <p class="gw__hint">Choose what the demo bank should answer:</p>
+        <div class="gw__actions">
+          <button class="btn btn--primary btn--block" type="button" id="gw-success"><span class="btn__label">Simulate success</span></button>
+          <button class="btn btn--liquid-fill btn--block" type="button" id="gw-failure"><span class="btn__label">Simulate failure</span></button>
+        </div>
+      </div>
+
+      <div class="gw__loading" id="gw-loading" hidden>
+        <span class="gw__spinner" aria-hidden="true"></span>
+        <p>Processing demo payment…</p>
+      </div>
+      <p class="sr-only" id="gw-live" role="status" aria-live="assertive"></p>
+    </div>
+  </div>
+
+  <div data-include="footer"></div>
+
+  <script src="/vendor/qrcode.js" defer></script>
+  <script src="/js/core.js" defer></script>
+  <script src="/js/buttons.js" defer></script>
+  <script type="module" src="/js/checkout.js"></script>
+</body>
+</html>

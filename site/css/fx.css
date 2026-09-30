@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Escape Cartel — supporting FX layer (pairs with js/fx.js + js/fx-field.js)
+   Load in <head> after the other stylesheets on every page. It must be in
+   <head> (not injected) so both pages of a navigation opt into the
+   cross-document view transition before first paint.
+
+   1. WebGL "route dust" canvas
+   2. Lite fallback: CSS dust (no WebGL, Save-Data, low-memory devices)
+   3. Page-to-page transition: ink drop (CSS view transitions, Chrome 126+,
+      Safari 18.2+; other browsers simply navigate normally)
+   4. Reduced motion: all of the above switched off
+   ========================================================================== */
+
+/* 1. WebGL layer. Black pixels are "no change" under difference, white
+   pixels invert what is beneath: chalk dust on ink, ink dust on chalk.
+   Sits above content, below the header (100) and every bar/drawer/modal.
+   Only created for sections that opt in with data-fx (see js/fx.js); kept
+   faint so it can never compete with text. */
+.fx-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0;
+  transition: opacity 900ms var(--ease-out, ease-out);
+}
+.fx-canvas.is-on { opacity: 0.35; }
+
+/* 2. Lite fallback: two tiled dot layers drifting at different speeds.
+   Only transform animates (compositor only, no repaint), same difference
+   blend so it stays black-and-white on both grounds. */
+.fx-dust {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+  mix-blend-mode: difference;
+  opacity: 0.2;
+}
+.fx-dust::before,
+.fx-dust::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-image:
+    radial-gradient(circle, #fff 0 0.8px, transparent 1.3px),
+    radial-gradient(circle, #fff 0 0.6px, transparent 1.1px);
+  background-size: 173px 149px, 97px 131px;
+  background-position: 0 0, 41px 67px;
+  animation: fx-dust-drift 90s linear infinite;
+  opacity: 0.7;
+}
+.fx-dust::after {
+  background-size: 251px 223px, 139px 181px;
+  background-position: 19px 83px, 107px 13px;
+  animation-duration: 140s;
+  animation-direction: reverse;
+  opacity: 0.45;
+}
+@keyframes fx-dust-drift { to { transform: translate3d(173px, -149px, 0); } }
+
+/* 3. Page transition: the new page grows out of an ink drop from the centre,
+   the old page sinks back slightly. Header is its own layer so it holds still. */
+@view-transition { navigation: auto; }
+.site-header { view-transition-name: site-header; }
+::view-transition-old(root) { animation: fx-vt-out 520ms cubic-bezier(0.77, 0, 0.175, 1) both; }
+::view-transition-new(root) { animation: fx-vt-in 640ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+::view-transition-group(site-header) { animation-duration: 0ms; }
+@keyframes fx-vt-out { to { transform: scale(0.94); opacity: 0.35; } }
+@keyframes fx-vt-in {
+  from { clip-path: circle(0% at 50% 55%); }
+  to { clip-path: circle(80% at 50% 55%); }
+}
+
+/* 4. Reduced motion: nothing drifts, nothing transitions between pages. */
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .fx-canvas, .fx-dust { display: none !important; }
+}
+.fx-off .fx-canvas, .fx-off .fx-dust { display: none !important; }
+
+/* Print: never print the layer. */
+@media print { .fx-canvas, .fx-dust { display: none !important; } }

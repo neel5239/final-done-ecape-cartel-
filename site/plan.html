@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Build your own trip and request a quote | Escape Cartel</title>
+  <meta name="description" content="Pick destinations, flexible dates, group size, budget, stay and add-ons. Send your custom trip plan to Escape Cartel on WhatsApp for a tailored quote.">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Escape Cartel">
+  <meta property="og:title" content="Build your own trip | Escape Cartel">
+  <meta property="og:description" content="Your stops, your dates, your budget. Build a plan and request a tailored quote on WhatsApp.">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Snow-covered Himalayan ridges seen from Kedarkantha summit in Uttarakhand">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
+  <link rel="preload" href="vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+  <link rel="stylesheet" href="css/bg.css">
+</head>
+<body data-no-bottombar>
+  <div data-include="header"></div>
+
+  <main id="main">
+    <section class="section page-head" data-theme="dark" aria-labelledby="page-title">
+      <div class="container">
+        <span class="page-head__ghost" aria-hidden="true">Yours</span>
+        <span class="eyebrow">Custom trip builder</span>
+        <h1 id="page-title">Build the trip around you.</h1>
+        <p class="lead">Choose your stops, dates, budget and style. Your plan is saved on this device, so you can come back to it before requesting a tailored quote.</p>
+      </div>
+    </section>
+
+    <section class="section" data-theme="light" aria-label="Trip builder" style="padding-top:var(--space-6)">
+      <div class="container builder">
+        <div class="steps">
+          <form id="builder" novalidate aria-label="Trip choices">
+            <section class="step" aria-labelledby="s1">
+              <div class="step__head"><span class="step__num" aria-hidden="true">1</span><h2 id="s1">Where to?</h2><p>Pick one or more. Mixing stops is fine.</p></div>
+              <fieldset>
+                <legend class="sr-only">Destinations</legend>
+                <div class="dest-grid" id="dest-grid"></div>
+              </fieldset>
+              <div class="field" id="other-field" hidden>
+                <label for="b-other">Tell us the place(s) you want <span class="field-hint">(required)</span></label>
+                <input class="input" id="b-other" name="b-other" maxlength="120" autocomplete="off" placeholder="e.g. Hampi, Andaman, Tawang" aria-describedby="b-other-hint b-other-error">
+                <p class="hint-line" id="b-other-hint">Add more than one place? Separate them with commas.</p>
+                <p class="field-error" id="b-other-error" role="alert" hidden></p>
+              </div>
+            </section>
+
+            <section class="step" aria-labelledby="s2">
+              <div class="step__head"><span class="step__num" aria-hidden="true">2</span><h2 id="s2">When?</h2><p>Flexible dates can lower the price.</p></div>
+              <div class="date-row">
+                <div class="field"><label for="b-start">From</label><input class="input" type="date" id="b-start" name="b-start"></div>
+                <div class="field"><label for="b-end">To</label><input class="input" type="date" id="b-end" name="b-end"></div>
+              </div>
+              <p class="hint-line" id="date-hint" aria-live="polite"></p>
+              <div class="field">
+                <span class="field-label" id="flex-label">How flexible are you?</span>
+                <fieldset class="chips chips--liquid" aria-labelledby="flex-label">
+                  <legend>Date flexibility</legend>
+                  <label class="chip"><input type="radio" name="b-flex" value="0" checked><span>Exact dates</span></label>
+                  <label class="chip"><input type="radio" name="b-flex" value="3"><span>± 3 days</span></label>
+                  <label class="chip"><input type="radio" name="b-flex" value="7"><span>± a week</span></label>
+                </fieldset>
+              </div>
+            </section>
+
+            <section class="step" aria-labelledby="s3">
+              <div class="step__head"><span class="step__num" aria-hidden="true">3</span><h2 id="s3">How many of you?</h2><p>Bigger groups save more per person.</p></div>
+              <div class="stepper" role="group" aria-labelledby="s3">
+                <button class="btn btn--icon btn--ripple" type="button" id="g-minus" aria-label="One traveller fewer">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </button>
+                <output class="stepper__val" id="g-val" aria-live="polite">2</output>
+                <button class="btn btn--icon btn--ripple" type="button" id="g-plus" aria-label="One traveller more">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </button>
+                <input type="hidden" name="b-group" id="b-group" value="2">
+              </div>
+              <p class="hint-line" id="group-hint"></p>
+            </section>
+
+            <section class="step" aria-labelledby="s4">
+              <div class="step__head"><span class="step__num" aria-hidden="true">4</span><h2 id="s4">Your budget</h2><p>Per person, before travel to the start point.</p></div>
+              <div class="field">
+                <label for="b-budget" class="field-label">Up to <output class="budget-out" id="b-budget-out" for="b-budget">₹15,000</output> per person</label>
+                <input class="range" type="range" id="b-budget" name="b-budget" min="3000" max="50000" step="500" value="15000">
+                <div class="range-scale" aria-hidden="true"><span>₹3k</span><span>₹50k</span></div>
+              </div>
+            </section>
+
+            <section class="step" aria-labelledby="s5">
+              <div class="step__head"><span class="step__num" aria-hidden="true">5</span><h2 id="s5">Where you sleep</h2></div>
+              <fieldset class="chips chips--liquid stay-chips" id="stay-chips">
+                <legend>Stay type</legend>
+                <!-- options from data.js STAY_TYPES -->
+              </fieldset>
+            </section>
+
+            <section class="step" aria-labelledby="s6">
+              <div class="step__head"><span class="step__num" aria-hidden="true">6</span><h2 id="s6">Add-ons</h2><p>Optional. Tap to add or remove.</p></div>
+              <fieldset class="chips chips--wrap" id="addon-chips">
+                <legend>Add-ons</legend>
+              </fieldset>
+            </section>
+          </form>
+
+          <section class="step" id="send" aria-labelledby="s7">
+            <div class="step__head"><span class="step__num" aria-hidden="true">7</span><h2 id="s7">Send it to us</h2><p>Your plan goes into a WhatsApp message to 98257 44110. You can edit it before sending.</p></div>
+            <form class="form-grid form-grid--2" id="plan-form" novalidate>
+              <div class="field">
+                <label for="p-name">Your name</label>
+                <input class="input" id="p-name" name="name" autocomplete="name" required maxlength="80">
+                <p class="field-error" data-error-for="name" hidden></p>
+              </div>
+              <div class="field">
+                <label for="p-phone">WhatsApp number</label>
+                <input class="input" id="p-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="98765 43210">
+                <p class="field-error" data-error-for="phone" hidden></p>
+              </div>
+              <div class="field">
+                <label for="p-email">Email <span class="field-hint">(optional)</span></label>
+                <input class="input" id="p-email" name="email" type="email" autocomplete="email" maxlength="120">
+                <p class="field-error" data-error-for="email" hidden></p>
+              </div>
+              <div class="field">
+                <label for="p-city">Travelling from <span class="field-hint">(optional)</span></label>
+                <input class="input" id="p-city" name="city" autocomplete="address-level2" maxlength="60" placeholder="City">
+              </div>
+              <div class="field field--full">
+                <label for="p-msg">Notes <span class="field-hint">(optional)</span></label>
+                <textarea class="textarea" id="p-msg" name="message" maxlength="450" placeholder="Must-see stops, food preferences, a birthday on the trip…"></textarea>
+                <p class="field-error" data-error-for="message" hidden></p>
+              </div>
+              <div class="hp" aria-hidden="true">
+                <label for="p-web">Leave this empty</label>
+                <input id="p-web" name="website" tabindex="-1" autocomplete="off">
+              </div>
+              <div class="form-foot field--full">
+                <button class="btn btn--submit btn--lg btn--block" type="submit" data-success-text="Opening WhatsApp">Send to WhatsApp</button>
+                <div class="form-status" data-form-status role="status" aria-live="polite"></div>
+                <div class="cluster" style="justify-content:space-between">
+                  <button class="link-swap" type="button" id="start-over">Start over</button>
+                  <a class="link-swap" href="trips.html">Browse ready-made trips</a>
+                </div>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <aside aria-label="Trip plan summary">
+          <div class="estimate ink-panel" id="estimate">
+            <div class="estimate__label">
+              <span class="eyebrow">Your plan</span>
+              <span class="badge badge--trace is-live" id="est-days">5 days</span>
+            </div>
+            <p class="estimate__range" id="est-range" aria-live="polite">Price on request</p>
+            <p class="estimate__total" id="est-total"></p>
+            <p class="estimate__fit" id="est-fit"></p>
+            <ul class="estimate__rows" id="est-rows" role="list"></ul>
+            <!-- TODO(owner): estimate rules and add-on costs in planner.js/data.js are placeholders until confirmed. -->
+            <p class="estimate__note">Send your choices and we will share a tailored price breakdown on WhatsApp before you pay anything.</p>
+            <a class="btn btn--gooey btn--block" href="#send"><span class="btn__label">Send this plan</span></a>
+            <p class="estimate__saved" id="est-saved">Plan saved on this device</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <div class="est-bar" id="est-bar" role="region" aria-label="Trip plan summary" data-theme="dark">
+    <p class="est-bar__val"><span id="bar-range">Price on request</span><small>Tailored quote on WhatsApp</small></p>
+    <a class="btn btn--primary btn--ripple btn--sm" href="#send"><span class="btn__label">Send plan</span></a>
+  </div>
+
+  <div data-include="footer"></div>
+
+  <script src="js/core.js" defer></script>
+  <script src="js/buttons.js" defer></script>
+  <script type="module" src="js/plan.js"></script>
+  <script type="module" src="js/fx.js"></script>
+</body>
+</html>

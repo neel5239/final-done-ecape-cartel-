@@ -1,0 +1,4 @@
+[
+  { "id": "sample-product", "kind": "product", "name": "Sample product", "description": "Replace this catalog with the client's real products or services.", "price": 499, "image": "", "category": "Sample", "maxQty": 10 },
+  { "id": "sample-booking", "kind": "booking", "name": "Sample booking", "description": "A bookable service or trip: the buyer picks a date.", "price": 1999, "image": "", "category": "Sample", "maxQty": 8 }
+]

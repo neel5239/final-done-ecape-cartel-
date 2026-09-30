@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Design system and buttons | Escape Cartel</title>
+  <meta name="description" content="Escape Cartel design system: black and white palette, type scale, spacing and every liquid button with its states.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Escape Cartel">
+  <meta property="og:title" content="Design system and buttons | Escape Cartel">
+  <meta property="og:description" content="Palette, type scale and the ten liquid button styles used across the Escape Cartel site.">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Snow-covered Himalayan ridges seen from Kedarkantha summit in Uttarakhand">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
+  <link rel="preload" href="vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <style>
+    /* Styleguide-only layout. Everything visual comes from the shared tokens. */
+    .sg-head { padding-top: calc(var(--header-h) + var(--space-6)); padding-bottom: var(--space-6); }
+    .sg-head p { margin-top: var(--space-2); }
+    .sg-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); margin-top: var(--space-4); }
+    .sg-cell { display: grid; align-content: start; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); min-width: 0; }
+    .sg-cell h3 { font-size: var(--step-1); }
+    .sg-cell p { color: var(--fg-muted); font-size: var(--step--1); }
+    .sg-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+    .sg-label { font-size: var(--step--1); color: var(--fg-muted); font-weight: 700; letter-spacing: 0.04em; }
+    .sg-focus { outline: 2px solid var(--focus-ring); outline-offset: 3px; box-shadow: 0 0 0 6px var(--focus-halo); }
+    .sg-swatches { display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); margin-top: var(--space-4); }
+    .sg-swatch { border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; font-size: var(--step--1); }
+    .sg-swatch i { display: block; height: 4.5rem; }
+    .sg-swatch span { display: block; padding: var(--space-1) var(--space-2); }
+    .sg-type > * + * { margin-top: var(--space-2); }
+    .sg-media { display: grid; place-items: center; min-height: 12rem; border-radius: var(--radius-md); background: var(--ink-raised) url("assets/images/places/himalaya-peaks.jpg") center / cover; color: var(--chalk); font-weight: 700; position: relative; overflow: hidden; }
+    .sg-media > span { background: var(--scrim); padding: var(--space-1) var(--space-2); border-radius: var(--radius-pill); }
+    .sg-media .btn-heart { position: absolute; top: var(--space-2); right: var(--space-2); }
+    .sg-status { font-variant-numeric: tabular-nums; }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div data-include="header"></div>
+
+  <main id="main">
+    <section class="section sg-head" data-theme="dark" aria-labelledby="sg-title">
+      <div class="container">
+        <span class="eyebrow">Design system</span>
+        <h1 id="sg-title">Night Pass: ink, chalk and liquid buttons</h1>
+        <p class="lead">Every colour comes from the Escape Cartel emblem. Every button below is the real component used on the site. Hover, tap or tab through them.</p>
+        <p class="sg-status muted" id="sg-libs">Checking vendored libraries…</p>
+      </div>
+    </section>
+
+    <!-- Palette + type -->
+    <section class="section" data-theme="light" aria-labelledby="sg-palette">
+      <div class="container">
+        <h2 id="sg-palette">Palette and type</h2>
+        <div class="sg-swatches">
+          <div class="sg-swatch"><i style="background:var(--ink)"></i><span>Ink #000000</span></div>
+          <div class="sg-swatch"><i style="background:var(--ink-raised)"></i><span>Ink raised #141414</span></div>
+          <div class="sg-swatch"><i style="background:var(--ink-line)"></i><span>Ink line #333333</span></div>
+          <div class="sg-swatch"><i style="background:var(--graphite)"></i><span>Graphite #595959</span></div>
+          <div class="sg-swatch"><i style="background:var(--fog)"></i><span>Fog #808080</span></div>
+          <div class="sg-swatch"><i style="background:var(--ash)"></i><span>Ash #A3A3A3</span></div>
+          <div class="sg-swatch"><i style="background:var(--chalk-line)"></i><span>Chalk line #E5E5E5</span></div>
+          <div class="sg-swatch"><i style="background:var(--chalk)"></i><span>Chalk #FFFFFF</span></div>
+        </div>
+        <div class="sg-type" style="margin-top:var(--space-5)">
+          <p class="display-xl">Leave Friday.</p>
+          <p class="h2">Heading 2 · Bricolage Grotesque</p>
+          <p class="h3">Heading 3 · 12 stops, your order</p>
+          <p class="lead">Lead · Manrope. Pick your dates, your budget and your stops.</p>
+          <p>Body · Manrope 400. Small groups of up to a dozen travellers, with one trip lead who knows the route.</p>
+          <p class="small muted">Caption · muted graphite, 7:1 on chalk</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Buttons on dark -->
+    <section class="section" data-theme="dark" aria-labelledby="sg-dark">
+      <div class="container">
+        <h2 id="sg-dark">Buttons on ink</h2>
+        <div class="sg-grid">
+          <div class="sg-cell">
+            <h3>01 Gooey blob split</h3>
+            <p>Primary CTA. Droplets split off and re-merge on hover or tap.</p>
+            <div class="sg-row"><a class="btn btn--gooey btn--lg" href="#main"><span class="btn__label">Explore trips</span></a></div>
+            <div class="sg-row">
+              <span class="sg-label">Focus</span><button class="btn btn--gooey sg-focus" type="button"><span class="btn__label">Focused</span></button>
+            </div>
+            <div class="sg-row"><span class="sg-label">Disabled</span><button class="btn btn--gooey" type="button" disabled><span class="btn__label">Sold out</span></button></div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>02 Liquid fill wave</h3>
+            <p>Secondary. A wave floods up from the base.</p>
+            <div class="sg-row"><button class="btn btn--liquid-fill" type="button"><span class="btn__label">Compare trips</span></button></div>
+            <div class="sg-row"><span class="sg-label">Pressed</span><button class="btn btn--liquid-fill is-pressed" type="button" data-sg-keep><span class="btn__label">Filled</span></button></div>
+            <div class="sg-row"><span class="sg-label">Disabled</span><button class="btn btn--liquid-fill" type="button" disabled><span class="btn__label">Unavailable</span></button></div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>03 Magnetic settle</h3>
+            <p>Nav CTA and WhatsApp. Pulls toward the pointer, springs back.</p>
+            <div class="sg-row">
+              <a class="btn btn--primary btn--magnetic" href="#main"><span class="btn__label">Plan my trip</span></a>
+              <a class="btn btn--icon btn--fab btn--magnetic" data-wa href="https://wa.me/919825744110" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><span class="btn__label"><svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3.2A12.7 12.7 0 0 0 5.1 22.4L3.3 28.8l6.6-1.7A12.7 12.7 0 1 0 16 3.2Zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.5 10.5 0 1 1 16 26.3Z"/></svg></span></a>
+            </div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>04 Ink ripple</h3>
+            <p>Card actions and date slots. The ripple starts where you touch.</p>
+            <div class="sg-row">
+              <button class="btn btn--primary btn--ripple" type="button"><span class="btn__label">Hold my seat</span></button>
+              <button class="btn btn--ghost btn--ripple" type="button"><span class="btn__label">Sat 14 Nov</span></button>
+            </div>
+            <div class="sg-row"><span class="sg-label">Quiet</span><button class="btn btn--quiet btn--ripple btn--sm" type="button"><span class="btn__label">Add a stop</span></button></div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>05 Pill-to-circle submit</h3>
+            <p>Forms. Pill closes to a loader, then draws a tick.</p>
+            <form class="sg-row" id="sg-form" novalidate>
+              <button class="btn btn--submit btn--lg" type="submit" data-success-text="Request sent">Send my plan</button>
+            </form>
+            <div class="sg-row">
+              <button class="btn btn--ghost btn--sm" type="button" data-sg-state="error">Show error</button>
+              <button class="btn btn--ghost btn--sm" type="button" data-sg-state="idle">Reset</button>
+            </div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>06 Liquid trace</h3>
+            <p>Badges and feature pills. Ink runs around the rim.</p>
+            <div class="sg-row">
+              <span class="badge badge--trace is-live">Pay in 3 parts</span>
+              <span class="badge badge--trace">Flexible dates</span>
+            </div>
+            <div class="sg-row"><button class="btn btn--trace btn--ghost btn--sm" type="button"><span class="btn__label">No hidden charges</span></button></div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>07 Ink-drop text swap</h3>
+            <p>Text links. Letters roll up in a stagger, underline draws in.</p>
+            <div class="sg-row">
+              <a class="link-swap" href="#sg-dark">View full inclusions</a>
+              <a class="link-swap" href="#sg-dark">Know more <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>08 Arrow slide-loop</h3>
+            <p>Icon and carousel buttons. The arrow exits right and re-enters.</p>
+            <div class="sg-row">
+              <button class="btn btn--icon btn--arrow btn--prev" type="button" aria-label="Previous"><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+              <button class="btn btn--icon btn--arrow" type="button" aria-label="Next"><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+              <a class="btn btn--primary btn--arrow" href="#main"><span class="btn__label">Next day</span><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+            </div>
+            <div class="sg-row"><span class="sg-label">Disabled</span><button class="btn btn--icon btn--arrow" type="button" disabled aria-label="Next (no more)"><span class="btn__label">→</span></button></div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>09 Blob cursor</h3>
+            <p>Media and hotspots. On a mouse, a blob inverts what is beneath and names the action.</p>
+            <div class="sg-media" data-cursor="View">
+              <span>Point here</span>
+              <button class="btn-heart" type="button" aria-pressed="false" aria-label="Save to wishlist" data-wishlist-id="styleguide-demo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.8-4.6-7.8-10.4A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 7.8 2.7c0 5.8-7.8 10.4-7.8 10.4Z" stroke-linejoin="round"/></svg></button>
+            </div>
+          </div>
+
+          <div class="sg-cell">
+            <h3>10 Viscous chips</h3>
+            <p>Filters. The bead stretches between options, then settles.</p>
+            <fieldset class="chips chips--liquid">
+              <legend>Trip length</legend>
+              <label class="chip"><input type="radio" name="sg-len" value="weekend" checked><span>Weekend</span></label>
+              <label class="chip"><input type="radio" name="sg-len" value="4-6"><span>4–6 days</span></label>
+              <label class="chip"><input type="radio" name="sg-len" value="7+"><span>7+ days</span></label>
+              <label class="chip"><input type="radio" name="sg-len" value="custom" disabled><span>Custom</span></label>
+            </fieldset>
+          </div>
+
+          <div class="sg-cell">
+            <h3>Toggle chips + heart</h3>
+            <p>Multi-select filters flood from the centre. The heart pops and bursts.</p>
+            <fieldset class="chips chips--wrap">
+              <legend>Trip style</legend>
+              <label class="chip chip--toggle"><input type="checkbox" checked><svg class="chip__tick" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><span>Trek</span></label>
+              <label class="chip chip--toggle"><input type="checkbox"><svg class="chip__tick" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><span>Beach</span></label>
+              <label class="chip chip--toggle"><input type="checkbox"><svg class="chip__tick" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><span>Heritage</span></label>
+            </fieldset>
+            <div class="sg-row">
+              <button class="btn-heart" type="button" aria-pressed="false" aria-label="Save to wishlist" data-wishlist-id="styleguide-demo-2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.8-4.6-7.8-10.4A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 7.8 2.7c0 5.8-7.8 10.4-7.8 10.4Z" stroke-linejoin="round"/></svg></button>
+              <button class="btn-heart" type="button" aria-pressed="true" aria-label="Remove from wishlist" data-wishlist-id="styleguide-demo-3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.8-4.6-7.8-10.4A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 7.8 2.7c0 5.8-7.8 10.4-7.8 10.4Z" stroke-linejoin="round"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Same components on chalk: proves the semantic tokens flip cleanly -->
+    <section class="section" data-theme="light" aria-labelledby="sg-light">
+      <div class="container">
+        <h2 id="sg-light">The same buttons on chalk</h2>
+        <div class="sg-grid">
+          <div class="sg-cell">
+            <h3>Primary + secondary</h3>
+            <div class="sg-row">
+              <a class="btn btn--gooey" href="#main"><span class="btn__label">Explore trips</span></a>
+              <button class="btn btn--liquid-fill" type="button"><span class="btn__label">Build my own</span></button>
+            </div>
+            <div class="sg-row">
+              <button class="btn btn--primary btn--ripple btn--magnetic" type="button"><span class="btn__label">Hold my seat</span></button>
+              <button class="btn btn--ghost btn--ripple" type="button"><span class="btn__label">Change dates</span></button>
+            </div>
+            <div class="sg-row"><span class="sg-label">Focus</span><button class="btn btn--ghost sg-focus" type="button"><span class="btn__label">Focused</span></button><span class="sg-label">Disabled</span><button class="btn btn--primary" type="button" disabled><span class="btn__label">Full</span></button></div>
+          </div>
+          <div class="sg-cell">
+            <h3>Links, chips, badges</h3>
+            <a class="link-swap" href="#sg-light">Read the cancellation terms</a>
+            <fieldset class="chips chips--liquid">
+              <legend>Budget</legend>
+              <label class="chip"><input type="radio" name="sg-budget" value="low"><span>Under ₹10k</span></label>
+              <label class="chip"><input type="radio" name="sg-budget" value="mid" checked><span>₹10k–25k</span></label>
+              <label class="chip"><input type="radio" name="sg-budget" value="high"><span>₹25k+</span></label>
+            </fieldset>
+            <div class="sg-row"><span class="badge badge--trace is-live">Student friendly</span><button class="btn btn--icon btn--arrow" type="button" aria-label="Next"><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></div>
+          </div>
+          <div class="sg-cell">
+            <h3>Submit on chalk</h3>
+            <button class="btn btn--submit btn--block" type="button" id="sg-submit-2" data-reset="2000">Send to WhatsApp</button>
+            <p>Loads for 1.2s, succeeds, then resets.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-include="footer"></div>
+
+  <script src="vendor/gsap/gsap.min.js" defer></script>
+  <script src="vendor/gsap/ScrollTrigger.min.js" defer></script>
+  <script src="js/core.js" defer></script>
+  <script src="js/buttons.js" defer></script>
+  <script>
+    // Styleguide demo wiring only (no business logic).
+    document.addEventListener('DOMContentLoaded', function () {
+      var EC = window.EC;
+      var form = document.getElementById('sg-form');
+      var demo = function (btn) {
+        EC.buttons.setState(btn, 'loading');
+        setTimeout(function () { EC.buttons.setState(btn, 'success'); }, 1200);
+      };
+      form.addEventListener('submit', function (e) { e.preventDefault(); demo(form.querySelector('.btn--submit')); });
+      document.getElementById('sg-submit-2').addEventListener('click', function () { demo(this); });
+      document.querySelectorAll('[data-sg-state]').forEach(function (b) {
+        b.addEventListener('click', function () { EC.buttons.setState(form.querySelector('.btn--submit'), b.getAttribute('data-sg-state')); });
+      });
+      // keep the "pressed" sample visibly pressed after buttons.js releases it
+      document.querySelectorAll('[data-sg-keep]').forEach(function (b) {
+        new MutationObserver(function () { if (!b.classList.contains('is-pressed')) b.classList.add('is-pressed'); }).observe(b, { attributes: true, attributeFilter: ['class'] });
+      });
+      var out = document.getElementById('sg-libs');
+      var g = window.gsap ? 'GSAP ' + window.gsap.version + (window.ScrollTrigger ? ' + ScrollTrigger' : '') : 'GSAP missing';
+      import('./vendor/three/three.module.min.js')
+        .then(function (THREE) { out.textContent = 'Loaded locally: ' + g + ', Three.js r' + THREE.REVISION + '.'; })
+        .catch(function () { out.textContent = 'Loaded locally: ' + g + '. Three.js failed to load.'; });
+    });
+  </script>
+</body>
+</html>

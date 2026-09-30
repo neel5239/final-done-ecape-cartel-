@@ -1,0 +1,348 @@
+/* ==========================================================================
+   Escape Cartel — info pages (about, contact, privacy, terms)
+   Load order: tokens.css -> base.css -> buttons.css -> info.css
+   Contents:
+   1. Page hero
+   2. Split layout + framed media
+   3. Placeholder markers (.tbc, .ph-card)
+   4. Values, promise, stats, testimonials, team
+   5. Closing CTA band
+   6. Contact: method cards, form, status, FAQ
+   7. Legal prose + table of contents
+   8. Reveal + tilt motion (opt-in via html.js-motion)
+   9. Reduced motion / forced colours
+   Only tokens are used for colour: the site is strictly black and white.
+   ========================================================================== */
+
+/* 1. Page hero ------------------------------------------------------------- */
+.info-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-block: calc(var(--header-h) + var(--space-6)) var(--space-6);
+}
+.info-hero--tall { min-height: min(38rem, 80svh); display: flex; align-items: flex-end; }
+.info-hero > .container { position: relative; z-index: 1; width: 100%; }
+.info-hero__media { position: absolute; inset: 0; z-index: -1; }
+.info-hero__media img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+/* Scrim keeps the headline above 7:1 whatever part of the photo sits under it. */
+.info-hero__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    /* was a 55-70% black wash over the whole photo; now a bottom fade into
+       the page plus a soft left fade behind the copy, so the photo shows in colour */
+    linear-gradient(to top, var(--ink) 3%, rgba(0, 0, 0, 0.45) 32%, rgba(0, 0, 0, 0) 62%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 45%, rgba(0, 0, 0, 0) 70%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 18%);
+}
+.info-hero h1, .info-hero .lead, .info-hero .eyebrow { text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6); }
+.info-hero .eyebrow { color: var(--chalk); }
+.info-hero h1 { margin-top: var(--space-2); max-width: 16ch; }
+.info-hero h1 .line { display: block; }
+.info-hero .lead { margin-top: var(--space-3); max-width: 46ch; color: var(--chalk); }
+.info-hero__actions { margin-top: var(--space-4); }
+.info-hero--plain h1 { max-width: 20ch; }
+
+/* 2. Split layout + framed media ------------------------------------------ */
+.split {
+  display: grid;
+  gap: var(--space-5);
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 60em) {
+  .split { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--space-6); }
+  .split--flip > :first-child { order: 2; }
+}
+.split__copy > * + * { margin-top: var(--space-2); }
+.split__copy h2 { margin-bottom: var(--space-1); }
+
+.frame {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.frame img { width: 100%; height: auto; }
+.frame--tall img { aspect-ratio: 4 / 5; object-fit: cover; }
+.frame--wide img { aspect-ratio: 3 / 2; object-fit: cover; }
+.frame figcaption { padding: var(--space-1) var(--space-2); font-size: var(--step--1); color: var(--fg-muted); border-top: 1px solid var(--line); }
+
+/* 3. Placeholder markers --------------------------------------------------- */
+/* Inline "[to confirm]" marker: dashed so it reads as a fill-in, never as fact. */
+.tbc {
+  display: inline;
+  padding: 0.05em 0.45em;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-xs);
+  color: var(--fg);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tbc--block { display: inline-flex; white-space: normal; }
+.ph-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 1.75rem;
+  padding: 0.15rem 0.7rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--fg-muted);
+  letter-spacing: 0.02em;
+}
+
+/* 4. Values, promise, stats, testimonials, team --------------------------- */
+.info-head { max-width: 46rem; margin-bottom: var(--space-5); }
+.info-head > * + * { margin-top: var(--space-2); }
+
+.card-grid {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+.info-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+.info-card h3 { font-size: var(--step-1); letter-spacing: -0.01em; }
+.info-card p { color: var(--fg-muted); }
+.info-card__num {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+@media (hover: hover) { .info-card:hover { border-color: var(--fg); } }
+
+/* Flexibility promise: four rows, each with its own "to confirm" flag. */
+.promise { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
+.promise__item {
+  display: grid;
+  gap: var(--space-1) var(--space-3);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.promise__icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+}
+.promise__icon svg { width: 1.5rem; height: 1.5rem; }
+.promise__item h3 { font-size: var(--step-1); letter-spacing: -0.01em; }
+.promise__item p { color: var(--fg-muted); margin-top: var(--space-0); }
+.promise__item .ph-tag { margin-top: var(--space-1); }
+@media (min-width: 48em) { .promise { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.promise__foot { margin-top: var(--space-3); color: var(--fg-muted); font-size: var(--step--1); }
+
+.stats {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 48em) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; padding: var(--space-3) var(--space-2); border-top: 2px solid var(--fg); }
+.stat dd { margin: 0; }
+.stat__value { display: block; font-family: var(--font-display); font-size: var(--step-3); font-weight: 800; line-height: 1.05; letter-spacing: var(--tracking-display); overflow-wrap: anywhere; }
+.stat__label { display: block; margin-top: var(--space-0); color: var(--fg-muted); font-size: var(--step--1); }
+
+.quote { display: flex; flex-direction: column; gap: var(--space-2); }
+.quote blockquote { margin: 0; font-family: var(--font-display); font-size: var(--step-1); line-height: 1.3; letter-spacing: -0.01em; }
+.quote figcaption { margin-top: auto; display: grid; gap: var(--space-0); color: var(--fg-muted); font-size: var(--step--1); }
+.quote { margin: 0; }
+
+.team-card { overflow: hidden; padding: 0; }
+.team-card .photo-soon { border-radius: 0; border-width: 0 0 1px; aspect-ratio: 4 / 5; text-align: center; padding: var(--space-2); }
+.team-card__body { padding: var(--space-2) var(--space-3) var(--space-3); display: grid; gap: var(--space-0); }
+.team-card__body h3 { font-size: var(--step-1); }
+.team-card__body p { color: var(--fg-muted); }
+
+/* 5. Closing CTA band ------------------------------------------------------ */
+.cta-band { text-align: center; }
+.cta-band .container { display: grid; justify-items: center; gap: var(--space-3); }
+.cta-band h2 { max-width: 18ch; }
+.cta-band p { color: var(--fg-muted); }
+
+/* 6. Contact --------------------------------------------------------------- */
+.contact-grid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@media (min-width: 64em) {
+  .contact-grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: var(--space-6); }
+}
+.methods { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
+.method {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  min-width: 0;
+}
+.method__icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; border: 1px solid var(--line-strong); }
+.method__icon svg { width: 1.4rem; height: 1.4rem; }
+.method h3 { font-size: var(--step-0); letter-spacing: 0; }
+.method p, .method .method__value { color: var(--fg-muted); font-size: var(--step--1); }
+.method__value { display: block; overflow-wrap: anywhere; }
+.method__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.method__actions .btn { flex: 1 1 10rem; }
+
+.lead-form {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+@media (min-width: 48em) { .lead-form { padding: var(--space-5); } }
+.lead-form__row { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 40em) { .lead-form__row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.field { display: grid; gap: var(--space-1); align-content: start; min-width: 0; }
+.field > label, .field > .field__label { font-weight: 700; font-size: var(--step--1); letter-spacing: 0.02em; }
+.field__opt { font-weight: 500; color: var(--fg-muted); }
+.field__hint { color: var(--fg-muted); font-size: var(--step--1); }
+.field input, .field select, .field textarea {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 1rem; /* 16px minimum stops iOS zooming into the field */
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.field textarea { min-height: 7.5rem; resize: vertical; }
+.field select { appearance: none; -webkit-appearance: none; padding-right: 2.5rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; }
+.field input::placeholder, .field textarea::placeholder { color: var(--fg-muted); opacity: 1; }
+@media (hover: hover) { .field :is(input, select, textarea):hover { border-color: var(--fg); } }
+.field :is(input, select, textarea)[aria-invalid="true"] { border-width: 2px; border-style: dashed; border-color: var(--fg); }
+.field-error { font-size: var(--step--1); font-weight: 700; color: var(--fg); }
+.field-error:not([hidden])::before { content: "! "; font-weight: 800; }
+/* Honeypot: off-screen, never focusable. Real users and screen readers never meet it. */
+.field--trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+.form-status { min-height: 1.5rem; font-weight: 600; }
+.form-status:empty { min-height: 0; }
+.form-status[data-state="success"], .form-status[data-state="error"] {
+  padding: var(--space-2);
+  border: 1px solid var(--fg);
+  border-radius: var(--radius-sm);
+}
+.form-status[data-state="error"] { border-style: dashed; border-width: 2px; }
+.form-status__link { font-weight: 800; }
+.lead-form__note { color: var(--fg-muted); font-size: var(--step--1); }
+.lead-form__note a { color: var(--fg); }
+
+.faq { display: grid; gap: var(--space-1); max-width: 48rem; }
+.faq details { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 3.5rem;
+  padding: var(--space-1) var(--space-3);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "";
+  flex-shrink: 0;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.faq details[open] summary::after { transform: rotate(-135deg); }
+.faq summary:focus-visible { border-radius: var(--radius-sm); }
+.faq__a { padding: 0 var(--space-3) var(--space-3); color: var(--fg-muted); }
+.faq__a > * + * { margin-top: var(--space-1); }
+
+/* 7. Legal prose + table of contents -------------------------------------- */
+.legal { display: grid; gap: var(--space-5); grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 64em) { .legal { grid-template-columns: 16rem minmax(0, 1fr); gap: var(--space-6); } }
+.legal__toc {
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+@media (min-width: 64em) { .legal__toc { position: sticky; top: calc(var(--header-h) + var(--space-2)); } }
+.legal__toc h2 { font-size: var(--step-0); letter-spacing: 0; margin-bottom: var(--space-1); font-family: var(--font-body); }
+.legal__toc ol { list-style: none; padding: 0; display: grid; gap: 0; counter-reset: toc; }
+.legal__toc li { counter-increment: toc; }
+.legal__toc a { display: flex; gap: 0.6em; align-items: center; min-height: var(--tap); text-decoration: none; color: var(--fg-muted); font-size: var(--step--1); font-weight: 600; }
+.legal__toc a::before { content: counter(toc, decimal-leading-zero); font-variant-numeric: tabular-nums; color: var(--fg); }
+.legal__toc a:hover { color: var(--fg); text-decoration: underline; }
+.legal__body { min-width: 0; max-width: 46rem; }
+.legal__body > section + section { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.legal__body h2 { font-size: var(--step-3); margin-bottom: var(--space-2); }
+.legal__body h3 { font-size: var(--step-1); letter-spacing: -0.01em; margin-top: var(--space-3); margin-bottom: var(--space-1); }
+.legal__body p + p, .legal__body p + ul, .legal__body ul + p { margin-top: var(--space-2); }
+.legal__body ul { padding-left: 1.25rem; display: grid; gap: var(--space-1); }
+.legal__body li::marker { color: var(--fg-muted); }
+.legal__body table { width: 100%; margin-top: var(--space-2); font-size: var(--step--1); }
+.legal__body th, .legal__body td { text-align: left; vertical-align: top; padding: var(--space-1) var(--space-2) var(--space-1) 0; border-bottom: 1px solid var(--line); }
+.legal__body th { font-weight: 700; }
+.legal__table-wrap { overflow-x: auto; }
+.legal__meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-3); color: var(--ash); font-size: var(--step--1); }
+.legal-note {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--step--1);
+}
+
+/* 8. Reveal + tilt motion --------------------------------------------------
+   Content is visible by default. Only when JS confirms motion is welcome
+   (html.js-motion) do reveal targets start lowered and fade in once. */
+.js-motion .reveal { opacity: 0; transform: translateY(1.5rem); transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); transition-delay: calc(var(--d, 0) * 70ms); }
+.js-motion .reveal.is-in { opacity: 1; transform: none; }
+.tilt { transform-style: preserve-3d; will-change: transform; }
+.tilt-scene { perspective: 900px; }
+
+/* 9. Reduced motion / forced colours -------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .js-motion .reveal { opacity: 1; transform: none; transition: none; }
+  .tilt { transform: none !important; }
+  .faq summary::after { transition: none; }
+}
+@media (forced-colors: active) {
+  .info-card, .promise__item, .method, .lead-form, .faq details, .frame { border: 1px solid CanvasText; }
+  .tbc, .ph-tag { border: 1px dashed CanvasText; }
+}

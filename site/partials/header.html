@@ -1,0 +1,50 @@
+<!-- Shared header. Loaded by js/core.js into <div data-include="header"></div>.
+     Static fallback: paste this markup directly at the top of <body> instead of
+     the placeholder; core.js enhances it the same way. Keep in sync with the
+     HEADER template inside js/core.js (used when fetch is unavailable, e.g. file://). -->
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" id="site-header" data-theme="dark">
+  <div class="container site-header__inner">
+    <a class="brand" href="index.html" aria-label="Escape Cartel, home">
+      <img class="brand__logo" src="assets/images/logo/logo-white.png" alt="Escape Cartel logo" width="64" height="64" decoding="async">
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <ul class="site-nav__list" role="list">
+        <li><a class="link-swap" href="index.html">Home</a></li>
+        <li><a class="link-swap" href="trips.html">Trips</a></li>
+        <li><a class="link-swap" href="plan.html">Plan my trip</a></li>
+        <li><a class="link-swap" href="about.html">About</a></li>
+        <li><a class="link-swap" href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="site-header__actions">
+      <!-- WhatsApp lives here below 1400px; the floating disc only shows where a free gutter exists (base.css 6e). -->
+      <a class="btn btn--icon btn--ghost btn--ripple header-wa" data-wa href="https://wa.me/919825744110" target="_blank" rel="noopener" aria-label="Chat with Escape Cartel on WhatsApp, 98257 44110">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3.2A12.7 12.7 0 0 0 5.1 22.4L3.3 28.8l6.6-1.7A12.7 12.7 0 1 0 16 3.2Zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.5 10.5 0 1 1 16 26.3Zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.2 4.6 1.9.8 2.7.9 3.6.7.6-.1 1.9-.8 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.3Z"/></svg>
+      </a>
+      <a class="btn btn--ghost btn--sm btn--ripple btn--icon-mobile" href="tel:+919825744110" aria-label="Call Escape Cartel on 98257 44110">
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.6 3.5h2.6l1.4 4-2 1.3a11 11 0 0 0 6.6 6.6l1.3-2 4 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="header-call__label">98257 44110</span>
+      </a>
+      <a class="btn btn--primary btn--sm btn--magnetic header-cta" href="trips.html"><span class="btn__label">Browse trips</span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open menu">
+        <span class="nav-toggle__bars" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="nav-drawer" id="nav-drawer" data-theme="dark">
+  <nav aria-label="Mobile">
+    <ul class="nav-drawer__list" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="trips.html">Trips</a></li>
+      <li><a href="plan.html">Plan my trip</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="nav-drawer__foot">
+    <a class="btn btn--liquid-fill btn--lg" href="tel:+919825744110"><span class="btn__label">Call 98257 44110</span></a>
+    <a class="btn btn--primary btn--lg btn--ripple" data-wa href="https://wa.me/919825744110" target="_blank" rel="noopener"><span class="btn__label">Chat on WhatsApp</span></a>
+  </div>
+</div>

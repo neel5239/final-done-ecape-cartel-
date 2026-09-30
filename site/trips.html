@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Small-group trips across India: treks, deserts, beaches | Escape Cartel</title>
+  <meta name="description" content="Browse ready student group trips and small-group trip ideas across India. Read the full day-by-day itinerary, stays and price before you join.">
+  <link rel="canonical" href="trips.html">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Escape Cartel">
+  <meta property="og:title" content="All trips | Escape Cartel">
+  <meta property="og:description" content="Treks, desert camps, backwaters and high passes. Small groups, clear budgets and pickup points.">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Snow-covered Himalayan ridges seen from Kedarkantha summit in Uttarakhand">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
+  <link rel="preload" href="vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+  <link rel="stylesheet" href="css/bg.css">
+  <link rel="stylesheet" href="css/itinerary.css">
+</head>
+<body data-no-bottombar>
+  <div data-include="header"></div>
+
+  <main id="main">
+    <section class="section page-head" data-theme="dark" aria-labelledby="page-title">
+      <div class="container">
+        <span class="page-head__ghost" aria-hidden="true">Trips</span>
+        <span class="eyebrow">Group trips and trip ideas · India</span>
+        <h1 id="page-title">Pick a trip. Read every day first.</h1>
+        <p class="lead">Open any trip to see the full day-by-day plan, stays and price before you join.</p>
+      </div>
+    </section>
+
+    <section class="section listing" data-theme="light" id="group-trips" aria-labelledby="group-title">
+      <div class="container">
+        <div class="listing__head">
+          <h2 id="group-title">Group trips open to join</h2>
+          <p class="muted">Dates, seats and budget per person are set. Read the itinerary, then join from the last step.</p>
+        </div>
+        <ul class="it-grid" id="group-grid" role="list" aria-label="Group trips open to join"></ul>
+        <div class="empty" id="group-empty" hidden>
+          <h3>No group trips are open right now.</h3>
+          <p class="muted">New departures are added by our team. Travelling with friends? We can plan a private trip for you.</p>
+          <a class="btn btn--primary" href="plan.html"><span class="btn__label">Plan my trip</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section listing" data-theme="light" aria-labelledby="ideas-title">
+      <div class="container">
+        <div class="listing__head">
+          <h2 id="ideas-title">More trip ideas</h2>
+          <p class="muted">Routes we run on request. Check the day-by-day plan, then ask us for dates and a price.</p>
+        </div>
+        <form class="filters" id="filters" role="search" aria-label="Filter trips">
+          <div class="filters__top">
+            <p class="filters__count" id="result-count" aria-live="polite">12 trip ideas</p>
+            <div class="filters__actions">
+              <button class="btn btn--ghost btn--sm btn--ripple filters__toggle" type="button" id="filters-toggle" aria-expanded="true" aria-controls="filters-panel">
+                <span class="btn__label">Filters<span class="filters__toggle-count" id="filters-active"></span></span>
+              </button>
+              <label class="chip chip--toggle">
+                <input type="checkbox" name="saved" value="1">
+                <svg class="chip__tick" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                <span>Saved (<span id="saved-count">0</span>)</span>
+              </label>
+              <label class="sr-only" for="f-sort">Sort trips</label>
+              <select class="select" id="f-sort" name="sort" style="width:auto">
+                <option value="recommended">Suggested</option>
+                <option value="days-asc">Shortest first</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filters__panel" id="filters-panel">
+            <div class="filters__group">
+              <span class="field-label" id="f-dest-label">Destination</span>
+              <fieldset class="chips chips--liquid" id="f-dest" aria-labelledby="f-dest-label">
+                <legend>Destination</legend>
+                <label class="chip"><input type="radio" name="dest" value="" checked><span>Anywhere</span></label>
+                <!-- region chips are added by js/trips.js from data.js -->
+              </fieldset>
+            </div>
+
+            <div class="filters__row">
+              <div class="filters__group filters__budget">
+                <label class="field-label" for="f-budget">Budget per person: <output id="f-budget-out" for="f-budget">Any budget</output></label>
+                <input class="range" type="range" id="f-budget" name="budget" min="6000" max="22000" step="500" value="22000">
+              </div>
+
+              <div class="filters__group">
+                <span class="field-label" id="f-dur-label">Duration</span>
+                <fieldset class="chips chips--liquid" aria-labelledby="f-dur-label">
+                  <legend>Duration</legend>
+                  <label class="chip"><input type="radio" name="dur" value="" checked><span>Any</span></label>
+                  <label class="chip"><input type="radio" name="dur" value="short"><span>Up to 5 days</span></label>
+                  <label class="chip"><input type="radio" name="dur" value="mid"><span>6 days</span></label>
+                  <label class="chip"><input type="radio" name="dur" value="long"><span>7+ days</span></label>
+                </fieldset>
+              </div>
+
+              <div class="filters__group">
+                <span class="field-label" id="f-diff-label">Difficulty</span>
+                <fieldset class="chips chips--liquid" aria-labelledby="f-diff-label">
+                  <legend>Difficulty</legend>
+                  <label class="chip"><input type="radio" name="diff" value="" checked><span>Any</span></label>
+                  <label class="chip"><input type="radio" name="diff" value="easy"><span>Easy</span></label>
+                  <label class="chip"><input type="radio" name="diff" value="moderate"><span>Moderate</span></label>
+                  <label class="chip"><input type="radio" name="diff" value="challenging"><span>Challenging</span></label>
+                </fieldset>
+              </div>
+
+              <div class="filters__group">
+                <label class="field-label" for="f-month">Month</label>
+                <select class="select" id="f-month" name="month">
+                  <option value="">Any month</option>
+                  <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+                  <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+                  <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+                  <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="filters__actions">
+              <button class="btn btn--liquid-fill btn--sm" type="button" data-reset-filters><span class="btn__label">Clear filters</span></button>
+            </div>
+          </div>
+        </form>
+
+        <div class="results">
+          <ul class="trip-grid" id="trip-grid" role="list" aria-label="Trips"></ul>
+
+          <div class="empty" id="empty" hidden>
+            <h2>No trip matches all of that.</h2>
+            <p class="muted">Loosen a filter, or tell us what you want and we will build it around your dates and budget.</p>
+            <div class="cluster">
+              <button class="btn btn--liquid-fill" type="button" data-reset-filters><span class="btn__label">Clear filters</span></button>
+              <a class="btn btn--gooey" href="plan.html"><span class="btn__label">Build my own trip</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight" data-theme="dark" aria-labelledby="custom-title">
+      <div class="container cluster" style="justify-content:space-between;gap:var(--space-3)">
+        <div>
+          <h2 id="custom-title" class="h3">Want different stops or dates?</h2>
+          <p class="muted">Mix destinations, pick your stay and send your plan for a tailored quote.</p>
+        </div>
+        <div class="cluster">
+          <a class="btn btn--gooey btn--lg" href="plan.html"><span class="btn__label">Build your trip</span></a>
+          <a class="link-swap" data-wa href="https://wa.me/919825744110" target="_blank" rel="noopener">Ask on WhatsApp</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Compare tray: filled by compare.js (attachCompareTray), hidden while empty -->
+  <div id="compare-tray" hidden></div>
+
+  <dialog class="dialog" id="compare-dialog" aria-labelledby="compare-title" data-theme="light">
+    <div class="dialog__head">
+      <h2 id="compare-title">Compare trips</h2>
+      <button class="btn btn--icon btn--sm btn--ripple" type="button" data-close aria-label="Close comparison">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="dialog__body" data-compare-body></div>
+  </dialog>
+
+  <div data-include="footer"></div>
+
+  <script src="js/core.js" defer></script>
+  <script src="js/buttons.js" defer></script>
+  <script type="module" src="js/trips.js"></script>
+  <script type="module" src="js/fx.js"></script>
+</body>
+</html>

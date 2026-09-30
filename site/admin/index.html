@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Owner dashboard</title>
+  <meta name="theme-color" content="#060606">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/logo/favicon-32.png">
+  <link rel="preload" href="/vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Light / dark choice before the first paint (admin.js keeps it in localStorage) -->
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('od-theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
+  <link rel="stylesheet" href="/admin/admin.css">
+  <link rel="stylesheet" href="/css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+</head>
+<body>
+  <main id="app" class="od-wrap" aria-live="polite"><p class="od-muted">Loading…</p></main>
+  <script src="/js/shop.js"></script>
+  <script src="/admin/trips.js"></script>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

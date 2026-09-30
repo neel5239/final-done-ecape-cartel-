@@ -1,0 +1,300 @@
+/* ==========================================================================
+   Itinerary page: student group trips (list view + one trip day by day + join)
+   Also loaded by trips.html for the group-trip cards (.it-card).
+   Reads tokens.css only. Scarcity uses one red, reserved for seats <= 3 and full trips.
+   Photos keep their own proportions: rounded rectangles with object-fit cover, no arch or circle crops.
+   ========================================================================== */
+
+.it-rules { display: flex; flex-wrap: wrap; gap: var(--space-1); margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+.it-rules li {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--step--1);
+  font-weight: 700;
+}
+
+/* Filters */
+.it-filters {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.it-filters__top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--space-2); }
+.it-filters__group { display: grid; gap: var(--space-1); min-width: 0; }
+.it-sort { min-width: min(100%, 12rem); }
+.it-sort .select { min-height: var(--tap); }
+.it-filters .chips--wrap { display: flex; flex-wrap: wrap; gap: var(--space-1); margin: 0; }
+.it-filters .chip { min-height: var(--tap); border: 1px solid var(--line-strong); }
+.it-filters .chip:has(input:checked) { background: var(--inverse-bg); color: var(--inverse-fg); border-color: var(--inverse-bg); }
+
+/* Grid: one column on phones */
+.it-grid { display: grid; gap: var(--space-4); grid-template-columns: 1fr; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 40em) { .it-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64em) { .it-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.it-grid[hidden] { display: none; }
+.it-noscript { color: var(--fg-muted); }
+
+.it-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  animation: it-in 500ms var(--ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 6) * 50ms);
+}
+@keyframes it-in { from { opacity: 0; transform: translateY(1rem); } }
+@supports (backdrop-filter: blur(1px)) {
+  .it-card { -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur)); }
+}
+
+.it-card__media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--ink-raised); isolation: isolate; }
+.it-card__media img { width: 100%; height: 100%; object-fit: cover; transition: scale 1s var(--ease-out); }
+@media (hover: hover) { .it-card:hover .it-card__media img { scale: 1.05; } }
+.it-card__media::after { content: ""; position: absolute; inset: 35% 0 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.82), transparent); z-index: 1; pointer-events: none; }
+.it-card__over { position: absolute; inset: 0; z-index: 2; display: grid; align-content: end; gap: 0.15rem; padding: var(--space-2); }
+.it-card__loc { font-size: var(--step--1); font-weight: 800; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--mist); }
+.it-card__title { font-size: var(--step-2); line-height: 1.05; color: var(--chalk); text-wrap: balance; }
+.it-card__title a { color: inherit; text-decoration: none; }
+/* The whole photo opens the itinerary through the title link. */
+.it-card__title a::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.it-card__title a:focus-visible { outline: none; box-shadow: none; }
+.it-card__media:has(a:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+
+.it-badge {
+  position: absolute; top: var(--space-1); left: var(--space-1); z-index: 2;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--glass-strong);
+  border: 1px solid var(--line-strong);
+  font-size: var(--step--1);
+  font-weight: 800;
+  color: var(--chalk);
+}
+.it-badge.it-seats--low, .it-badge.it-seats--full { background: #c62828; border-color: #ff8a80; }
+
+.it-card__body { display: flex; flex: 1; flex-direction: column; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-3); }
+.it-card__blurb { color: var(--fg-muted); font-size: var(--step--1); }
+.it-facts { display: grid; gap: 0.4rem; margin: 0; padding: 0; list-style: none; font-size: var(--step--1); font-weight: 600; }
+.it-facts li { display: flex; align-items: flex-start; gap: 0.5rem; }
+.it-facts svg { flex: none; width: 1.1em; height: 1.1em; margin-top: 0.15em; }
+
+.it-seats { display: grid; gap: 0.4rem; margin-top: auto; }
+.it-seats__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; font-size: var(--step--1); font-weight: 700; }
+.it-seats__row span:last-child { color: var(--fg-muted); font-weight: 600; }
+.it-seats__bar { height: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
+.it-seats__bar > i { display: block; width: 100%; height: 100%; border-radius: 8px; background: var(--chalk); transform-origin: left; transform: scaleX(var(--filled, 0)); transition: transform 900ms var(--ease-out); }
+.it-seats--low .it-seats__bar > i, .it-seats--full .it-seats__bar > i { background: #ff5252; }
+.it-seats--low .it-seats__left, .it-seats--full .it-seats__left { color: #ff8a80; }
+.it-seats--low .it-seats__left::before {
+  content: ""; display: inline-block; width: 0.5em; height: 0.5em; margin-right: 0.4em; border-radius: 50%;
+  background: currentColor; animation: it-pulse 1.6s var(--ease-in-out) infinite;
+}
+@keyframes it-pulse { 50% { opacity: 0.3; } }
+
+.it-card__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--line); }
+.it-price { display: grid; line-height: 1.1; }
+.it-price strong { font-family: var(--font-display); font-size: var(--step-2); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.it-price span { font-size: 0.75rem; font-weight: 600; color: var(--fg-muted); }
+.it-card__foot .btn { flex: 0 0 auto; width: auto; min-height: var(--tap); white-space: nowrap; }
+
+.it-drop { margin-top: var(--space-4); text-align: center; font-weight: 700; color: var(--fg-muted); }
+#it-empty { margin-top: var(--space-2); }
+
+/* Join dialog */
+.it-dialog { width: min(100% - 2 * var(--space-2), 32rem); }
+.it-form { display: grid; gap: var(--space-3); align-content: start; }
+.it-form__trip { font-weight: 700; color: var(--fg-muted); font-size: var(--step--1); }
+.it-form .form-status { min-height: 0; }
+.it-form .input { min-height: 3rem; }
+.it-pickup { display: grid; gap: var(--space-1); min-width: 0; margin: 0; padding: 0; border: 0; }
+.it-pickup legend { padding: 0; margin-bottom: var(--space-1); }
+.it-pickup__opts { display: grid; gap: var(--space-1); }
+.it-radio, .it-check {
+  display: flex; align-items: center; gap: 0.75rem;
+  min-height: var(--tap);
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  font-weight: 700;
+  cursor: pointer;
+}
+.it-radio:has(input:checked), .it-check:has(input:checked) { border-color: var(--fg); background: rgba(255, 255, 255, 0.08); }
+.it-radio:has(input:focus-visible), .it-check:has(input:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.it-radio input, .it-check input { flex: none; width: 1.4rem; height: 1.4rem; margin: 0; accent-color: var(--chalk); }
+.it-radio input[aria-invalid="true"], .it-check input[aria-invalid="true"] { outline: 2px dashed #ff8a80; outline-offset: 2px; }
+.it-form .field-error { color: #ff8a80; }
+.it-form .field-error:not(:empty)::before { background: #ff8a80; color: var(--ink); }
+.it-form .form-status:empty { display: none; }
+
+/* ==========================================================================
+   Detail view (?id=): one trip day by day
+   ========================================================================== */
+
+/* Hero: the cover photo full-bleed, facts on a bottom scrim. */
+.ix-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: min(88vh, 50rem);
+  min-height: min(88svh, 50rem);
+  padding-top: calc(var(--header-h) + var(--space-3));
+  padding-bottom: var(--space-5);
+  overflow: hidden;
+  isolation: isolate;
+}
+.ix-hero__img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.ix-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.1) 80%); }
+.ix-hero__inner { display: grid; gap: var(--space-2); justify-items: start; }
+.ix-back { font-size: var(--step--1); font-weight: 700; color: var(--chalk); }
+.ix-back::before { content: "\2190\00a0"; }
+.ix-hero__loc { font-size: var(--step--1); font-weight: 800; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--chalk-line); }
+.ix-hero h1 { font-size: var(--step-5); line-height: 1; max-width: 16ch; text-wrap: balance; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55); }
+.ix-hero__lead { max-width: 52ch; color: var(--chalk-line); text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6); }
+.ix-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  width: 100%;
+  max-width: 52rem;
+  margin: var(--space-1) 0 0;
+  overflow: hidden;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-sm);
+  background: var(--glass-line);
+}
+.ix-stats > div { min-width: 0; padding: var(--space-1) var(--space-2); background: var(--glass-strong); }
+.ix-stats dt { font-size: 0.75rem; font-weight: 800; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--mist); }
+.ix-stats dd { margin: 0.15rem 0 0; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--chalk); }
+@media (min-width: 48em) { .ix-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ix-hero__actions { margin-top: var(--space-1); }
+
+/* Sticky day navigator: sits under the header, moves up when the header hides. */
+.ix-daynav {
+  position: sticky;
+  top: var(--header-h);
+  z-index: var(--z-raised);
+  border-block: 1px solid var(--glass-line);
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  transition: top var(--dur-base) var(--ease-out);
+}
+body:has(.site-header.is-hidden) .ix-daynav { top: 0; }
+.ix-daynav__list {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-1) 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.ix-daynav__list::-webkit-scrollbar { display: none; }
+.ix-daynav__list li { flex: none; scroll-snap-align: start; }
+.ix-daynav__link {
+  display: grid;
+  align-content: center;
+  min-height: var(--tap);
+  padding: 0.35rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  color: var(--chalk);
+  text-decoration: none;
+  line-height: 1.15;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.ix-daynav__link strong { font-size: var(--step--1); font-weight: 800; }
+.ix-daynav__link span { max-width: 14ch; overflow: hidden; font-size: 0.75rem; color: var(--mist); text-overflow: ellipsis; white-space: nowrap; }
+.ix-daynav__link.is-active { background: var(--chalk); border-color: var(--chalk); color: var(--ink); }
+.ix-daynav__link.is-active span { color: var(--ink); }
+@media (hover: hover) { .ix-daynav__link:not(.is-active):hover { background: var(--surface-hover); } }
+.ix-daynav__link--join { border-style: dashed; }
+
+/* Days: the "About the trip" timeline from css/trip-itinerary.css (.tl, .tl-day), plus what the
+   group-trip page adds: jump targets for the day navigator, photos that open the photo viewer,
+   and a rail that fills with scroll (GSAP, itinerary.js). */
+.ix-route { position: relative; min-width: 0; }
+.ix-route__fill { position: absolute; top: 0.9rem; bottom: 0; left: 1.3rem; z-index: 1; width: 2px; background: #fff; transform-origin: top; transform: scaleY(0); }
+.ix-route .tl-day { scroll-margin-top: calc(var(--header-h) + 5rem); }
+.ix-route .tl-day__dot { z-index: 2; }
+.tl-photos > button { padding: 0; cursor: zoom-in; overflow: hidden; color: inherit; transition: translate 300ms var(--ease-out), box-shadow 300ms var(--ease-out); }
+.tl-photos > button img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tl-photos > button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+@media (hover: hover) { .tl-photos > button:hover { z-index: 2; translate: 0 -4px; box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6); } }
+.tl-day--empty { display: block; padding-left: 3.4rem; color: var(--tl-text); }
+@media (min-width: 64em) {
+  .ix-route__fill { left: 50%; margin-left: -1px; }
+  .tl-day--empty { padding-left: 0; text-align: center; }
+}
+
+/* Price, inclusions, stays and the Join button: the end of the plan. */
+.ix-book__grid { display: grid; gap: var(--space-5); }
+@media (min-width: 64em) { .ix-book__grid { grid-template-columns: minmax(0, 1fr) 24rem; align-items: start; } }
+.ix-book h2 { font-size: var(--step-4); margin-bottom: var(--space-3); }
+.ix-book__sub { font-size: var(--step-2); margin: var(--space-5) 0 var(--space-2); }
+.ix-incl, .ix-stays { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+@media (min-width: 40em) { .ix-incl { grid-template-columns: 1fr 1fr; gap: var(--space-1) var(--space-3); } }
+.ix-incl li { display: grid; grid-template-columns: 1.4rem 1fr; gap: var(--space-1); align-items: start; }
+.ix-incl svg { width: 1.1rem; height: 1.1rem; margin-top: 0.25rem; }
+.ix-stays li {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  gap: var(--space-1);
+  align-items: start;
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.ix-stays svg { width: 1.2rem; height: 1.2rem; margin-top: 0.15rem; }
+.ix-stays div { display: grid; gap: 0.1rem; }
+.ix-stays span { font-size: var(--step--1); color: var(--fg-muted); }
+
+.ix-summary {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--glass-strong);
+}
+@media (min-width: 64em) { .ix-summary { position: sticky; top: calc(var(--header-h) + 5rem); } }
+.ix-summary__title { font-size: var(--step-1); }
+.ix-summary__price { display: grid; line-height: 1.1; }
+.ix-summary__price strong { font-family: var(--font-display); font-size: var(--step-4); font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.ix-summary__price span { font-size: var(--step--1); color: var(--fg-muted); font-weight: 600; }
+.ix-summary__list { display: grid; gap: 0; margin: 0; }
+.ix-summary__list > div { display: flex; justify-content: space-between; gap: var(--space-2); padding: 0.55rem 0; border-bottom: 1px solid var(--line); font-size: var(--step--1); }
+.ix-summary__list dt { color: var(--fg-muted); }
+.ix-summary__list dd { margin: 0; font-weight: 700; text-align: right; }
+.ix-join { min-height: 3.25rem; }
+
+/* Mobile join bar (shares .trip-bar from pages.css). */
+.ix-bar { padding-inline: var(--gutter); }
+.ix-bar[hidden] { display: none; }
+.ix-bar__price { display: grid; line-height: 1.1; }
+.ix-bar__price strong { font-family: var(--font-display); font-size: var(--step-1); font-weight: 800; font-variant-numeric: tabular-nums; }
+.ix-bar__price span { font-size: 0.75rem; color: var(--mist); }
+.ix-bar__btn { min-height: var(--tap); white-space: nowrap; }
+
+.ix-missing h1 { font-size: var(--step-5); max-width: 18ch; }
+.ix-missing .lead { margin-block: var(--space-2) var(--space-4); max-width: 52ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tl-photos > button, .ix-daynav__link, .ix-daynav { transition: none; }
+  .it-card { animation: none; }
+  .it-card__media img, .it-seats__bar > i { transition: none; }
+  .it-seats--low .it-seats__left::before { animation: none; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .it-card { background: var(--glass-strong); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}

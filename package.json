@@ -1,0 +1,11 @@
+{
+  "name": "client-website",
+  "private": true,
+  "type": "module",
+  "description": "Website with orders, payments (demo / UPI / Razorpay) and an owner dashboard. No npm packages needed.",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/app.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server/app.js"
+  }
+}

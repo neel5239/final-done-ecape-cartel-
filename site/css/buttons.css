@@ -1,0 +1,629 @@
+/* ==========================================================================
+   Escape Cartel — liquid buttons
+   Source: research/buttons.md (10 liquid animations + micro-interactions),
+   rebuilt on the Night Pass tokens so every variant works on dark AND light
+   ground (they read --inverse-bg / --fg, never raw colours).
+
+   Class map (where to use -> class)                         JS needed?
+   01 Gooey blob split   primary hero CTA     .btn--gooey        yes (adds blobs; CSS fallback = solid pill)
+   02 Liquid fill wave   secondary / ghost    .btn--liquid-fill  no  (JS only adds touch hold)
+   03 Magnetic settle    nav CTA, WhatsApp    .btn--magnetic     yes (pointer tracking + spring)
+   04 Ink ripple         cards, date slots    .btn--ripple       yes (spawns ripple at pointer)
+   05 Pill-to-circle     form submit          .btn--submit       yes (EC.buttons.setState)
+   06 Liquid trace       badges / feature pills .badge--trace, .btn--trace   no
+   07 Ink-drop text swap text links           .link-swap         yes (splits letters; CSS fallback underline)
+   08 Arrow slide-loop   icon / carousel      .btn--arrow        no
+   09 Blob cursor        media / hotspots     [data-cursor="View"] yes (fine pointers only)
+   10 Viscous chips      filters              .chips--liquid     yes (moves the bead)
+   +  Heart pop          wishlist             .btn-heart         yes (toggles aria-pressed)
+   +  Toggle chip        multi-select filter  .chip--toggle      no
+
+   Base shapes: .btn (+ --primary, --ghost, --quiet, --sm, --lg, --block),
+   .btn--icon (44px circle). Every button: min 44px tap target, visible
+   :focus-visible (base.css), :active press, disabled, reduced-motion.
+   Motion: only transform / opacity animate, plus clip-path on two layers
+   (submit morph, chip bead) which Chromium/WebKit composite.
+   ========================================================================== */
+
+/* ---------- Base ---------------------------------------------------------- */
+.btn {
+  --btn-pad-x: 1.5rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 3rem;            /* 48px; never below --tap (44px) */
+  min-width: var(--tap);
+  padding: 0.75rem var(--btn-pad-x);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  isolation: isolate;          /* keep liquid layers under the label */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;  /* no 300ms delay, no double-tap zoom */
+  user-select: none;
+  /* individual transform props: JS magnetic uses `translate`, press uses `scale` */
+  transition:
+    scale var(--dur-fast) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
+}
+.btn:focus-visible { border-radius: var(--radius-pill); }
+.btn__label { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 0.5em; }
+.btn__icon, .btn svg { width: 1.25em; height: 1.25em; flex-shrink: 0; }
+
+/* Press: every button dips on pointer-down. Touch users get this instead of
+   hover; .is-pressed is held by buttons.js for ~250ms so a quick tap is seen. */
+.btn:active, .btn.is-pressed { scale: 0.96; transition-duration: var(--dur-instant); }
+
+/* Fills */
+.btn--primary { background: var(--inverse-bg); color: var(--inverse-fg); }
+.btn--ghost { border-color: var(--line-strong); color: var(--fg); }
+.btn--quiet { background: var(--surface); color: var(--fg); }
+@media (hover: hover) {
+  .btn--primary:hover { background: color-mix(in srgb, var(--inverse-bg) 88%, var(--bg)); }
+  .btn--ghost:hover { border-color: var(--fg); }
+  .btn--quiet:hover { background: var(--surface-hover); }
+}
+
+/* Sizes */
+.btn--sm { --btn-pad-x: 1.1rem; min-height: var(--tap); font-size: var(--step--1); }
+.btn--lg { --btn-pad-x: 2rem; min-height: 3.5rem; font-size: var(--step-1); }
+.btn--block { display: flex; width: 100%; }
+
+/* Disabled: fog greys, no motion, no pointer. */
+.btn:disabled, .btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  scale: 1;
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--fog);
+  pointer-events: none;
+}
+.btn:disabled > :not(.btn__label), .btn[aria-disabled="true"] > :not(.btn__label) { display: none; }
+
+/* Icon-only circle. Always give it an aria-label. */
+.btn--icon {
+  --btn-pad-x: 0;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border-color: var(--line-strong);
+}
+.btn--icon.btn--sm { width: var(--tap); height: var(--tap); }
+.btn--icon.btn--lg { width: 3.5rem; height: 3.5rem; }
+@media (hover: hover) { .btn--icon:hover { border-color: var(--fg); } }
+
+
+/* ---------- 01 Gooey blob split (primary CTA) -----------------------------
+   The pill body and three droplets sit in .btn__goo, which is filtered by the
+   SVG #ec-goo filter (blur + alpha contrast = surface tension). The label is
+   outside the filter so text stays crisp. Without JS the button is a plain
+   solid pill (the .is-goo class is only added once the blobs exist). */
+.btn--gooey { background: var(--inverse-bg); color: var(--inverse-fg); }
+.btn--gooey.is-goo { background: transparent; }
+.btn__goo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  filter: url("#ec-goo");
+  pointer-events: none;
+}
+.btn__goo > i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: -0.875rem 0 0 -0.875rem;
+  border-radius: 50%;
+  background: var(--inverse-bg);
+  transform: translate(0, 0) scale(0.6);
+  will-change: transform;
+}
+.btn__goo > i:first-child {       /* the pill body */
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  border-radius: var(--radius-pill);
+  transform: none;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+/* The splash plays once per hover / tap (class toggled by buttons.js). */
+.btn--gooey.is-splash .btn__goo > i:nth-child(2) { animation: goo-a var(--dur-liquid) var(--ease-in-out); }
+.btn--gooey.is-splash .btn__goo > i:nth-child(3) { animation: goo-b var(--dur-liquid) var(--ease-in-out) 40ms; }
+.btn--gooey.is-splash .btn__goo > i:nth-child(4) { animation: goo-c var(--dur-liquid) var(--ease-in-out) 80ms; }
+@media (hover: hover) {
+  .btn--gooey:hover .btn__goo > i:first-child { transform: scaleX(1.04) scaleY(1.08); }
+}
+/* disabled gooey: back to the flat disabled fill (goo layer is hidden) */
+.btn--gooey.is-goo:is(:disabled, [aria-disabled="true"]) { background: var(--surface); }
+
+@keyframes goo-a {
+  0%   { transform: translate(0, 0) scale(0.6); }
+  45%  { transform: translate(-190%, -95%) scale(1.15); }
+  100% { transform: translate(0, 0) scale(0.6); }
+}
+@keyframes goo-b {
+  0%   { transform: translate(0, 0) scale(0.6); }
+  50%  { transform: translate(170%, -85%) scale(1.25); }
+  100% { transform: translate(0, 0) scale(0.6); }
+}
+@keyframes goo-c {
+  0%   { transform: translate(0, 0) scale(0.6); }
+  55%  { transform: translate(60%, 110%) scale(1); }
+  100% { transform: translate(0, 0) scale(0.6); }
+}
+
+
+/* ---------- 02 Liquid fill wave (secondary / ghost) -----------------------
+   A wave-topped layer sits below the button; hover, focus or press floods it
+   upward while it sways sideways. `translate` handles the rise, `transform`
+   the sway, so the two motions compose without JS. */
+.btn--liquid-fill {
+  overflow: hidden;
+  border-color: var(--line-strong);
+  color: var(--fg);
+}
+.btn--liquid-fill::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: -50%;
+  width: 200%;
+  top: 0;
+  height: 130%;
+  background: var(--fg);
+  /* wavy top edge: SVG sine strip + solid body, both as mask layers */
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6 Q15 0 30 6 T60 6 T90 6 T120 6 V12 H0Z'/%3E%3C/svg%3E") top left / 60px 12px repeat-x,
+    linear-gradient(#000 0 0) 0 11px / 100% 100% no-repeat;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6 Q15 0 30 6 T60 6 T90 6 T120 6 V12 H0Z'/%3E%3C/svg%3E") top left / 60px 12px repeat-x,
+    linear-gradient(#000 0 0) 0 11px / 100% 100% no-repeat;
+  translate: 0 105%;
+  transition: translate var(--dur-liquid) var(--ease-out);
+  animation: wave-sway 2.4s linear infinite paused;
+}
+.btn--liquid-fill > .btn__label, .btn--liquid-fill > :not(.btn__ripple) { position: relative; z-index: 2; }
+.btn--liquid-fill:is(.is-pressed, :focus-visible) { color: var(--bg); border-color: var(--fg); }
+.btn--liquid-fill:is(.is-pressed, :focus-visible)::before { translate: 0 -12%; animation-play-state: running; }
+@media (hover: hover) {
+  .btn--liquid-fill:hover { color: var(--bg); border-color: var(--fg); }
+  .btn--liquid-fill:hover::before { translate: 0 -12%; animation-play-state: running; }
+}
+@keyframes wave-sway { to { transform: translateX(-60px); } }
+/* The label colour flips a beat after the tide starts so it never reads
+   white-on-white mid-rise. */
+.btn--liquid-fill { transition: scale var(--dur-fast) var(--ease-out), color var(--dur-base) var(--ease-out) 120ms, border-color var(--dur-base) var(--ease-out); }
+
+
+/* ---------- 03 Magnetic (nav CTA, WhatsApp) -------------------------------
+   buttons.js writes `translate` on the button and --mx/--my on the label;
+   leaving springs back with an elastic overshoot (JS spring, not CSS). */
+.btn--magnetic .btn__label { translate: var(--mx, 0) var(--my, 0); }
+.btn--magnetic { will-change: translate; }
+
+
+/* ---------- 04 Ink ripple (cards, date slots, any action) ------------------ */
+.btn--ripple { overflow: hidden; }
+.btn__ripple {
+  position: absolute;
+  z-index: 1;
+  left: var(--rx, 50%);
+  top: var(--ry, 50%);
+  width: var(--rs, 200px);
+  height: var(--rs, 200px);
+  margin: calc(var(--rs, 200px) / -2) 0 0 calc(var(--rs, 200px) / -2);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.28;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ink-ripple 620ms var(--ease-out) forwards;
+}
+@keyframes ink-ripple {
+  60%  { opacity: 0.2; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+
+/* ---------- 05 Pill-to-circle submit (forms) -------------------------------
+   The fill is a layer clipped to a pill; loading clips it to a 48px circle
+   with three bouncing dots, success draws a tick, error shakes once.
+   API: EC.buttons.setState(button, 'loading' | 'success' | 'error' | 'idle') */
+.btn--submit { background: transparent; color: var(--inverse-fg); min-width: 3rem; }
+.btn--submit::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  background: var(--inverse-bg);
+  border-radius: var(--radius-pill);
+  clip-path: inset(0 0 round var(--radius-pill));
+  transition: clip-path var(--dur-slow) var(--ease-in-out), background-color var(--dur-base) var(--ease-out);
+}
+.btn--submit:is(:disabled, [aria-disabled="true"])::before { background: var(--surface); }
+.btn--submit .btn__label { transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+.btn__dots, .btn__tick {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.btn__dots > span { display: flex; gap: 5px; }
+.btn__dots i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: dot-bounce 900ms var(--ease-in-out) infinite; }
+.btn__dots i:nth-child(2) { animation-delay: 120ms; }
+.btn__dots i:nth-child(3) { animation-delay: 240ms; }
+@keyframes dot-bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+.btn__tick svg { width: 22px; height: 22px; }
+.btn__tick path { stroke-dasharray: 30; stroke-dashoffset: 30; transition: stroke-dashoffset 420ms var(--ease-out) 200ms; }
+
+.btn--submit[data-state="loading"], .btn--submit[data-state="success"] { pointer-events: none; }
+.btn--submit:is([data-state="loading"], [data-state="success"])::before {
+  clip-path: inset(0 calc(50% - 1.5rem) round var(--radius-pill));
+}
+.btn--submit:is([data-state="loading"], [data-state="success"]) .btn__label { opacity: 0; transform: scale(0.9); }
+.btn--submit[data-state="loading"] .btn__dots { opacity: 1; transition-delay: 200ms; }
+.btn--submit[data-state="success"] .btn__tick { opacity: 1; }
+.btn--submit[data-state="success"] .btn__tick path { stroke-dashoffset: 0; }
+.btn--submit[data-state="error"] { animation: btn-shake 420ms var(--ease-out); }
+@keyframes btn-shake {
+  20% { transform: translateX(-6px); } 40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); } 80% { transform: translateX(2px); }
+}
+
+
+/* ---------- 06 Liquid trace border (badges, feature pills) -----------------
+   A dashed stroke flows around the pill perimeter like liquid in a tube.
+   .badge--trace runs quietly when .is-live or hovered; .btn--trace is the
+   pressable version. buttons.js injects the SVG ring. */
+.badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 2rem;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--fg);
+  background: var(--surface);
+  white-space: nowrap;
+}
+.trace-ring {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.trace-ring rect {
+  x: 0.5px; y: 0.5px;
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+  rx: 999px;
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 1.5;
+  stroke-dasharray: 14 6;
+  animation: trace-flow 1.6s linear infinite paused;
+}
+.badge--trace, .btn--trace { border-color: var(--line); }
+.badge--trace.is-live .trace-ring, .btn--trace:is(.is-pressed, :focus-visible) .trace-ring { opacity: 1; }
+.badge--trace.is-live .trace-ring rect, .btn--trace:is(.is-pressed, :focus-visible) .trace-ring rect { animation-play-state: running; }
+@media (hover: hover) {
+  .badge--trace:hover .trace-ring, .btn--trace:hover .trace-ring { opacity: 1; }
+  .badge--trace:hover .trace-ring rect, .btn--trace:hover .trace-ring rect { animation-play-state: running; }
+}
+@keyframes trace-flow { to { stroke-dashoffset: -40; } }
+
+
+/* ---------- 07 Ink-drop text swap (text links) ----------------------------
+   buttons.js wraps each letter in a clipped two-line track; the letters roll
+   up in a stagger. Underline draws from the left only on interaction.
+   Without JS (or reduced motion) it is a plain underlined link. */
+.link-swap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: var(--tap);
+  color: var(--fg);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+}
+.link-swap.is-split { text-decoration: none; }
+.link-swap__text { display: inline-flex; height: 1.25em; overflow: hidden; line-height: 1.25; }
+.link-swap__letter { display: inline-block; height: 1.25em; overflow: hidden; white-space: pre; }
+.link-swap__track {
+  display: block;
+  white-space: pre;
+  transition: transform 460ms var(--ease-in-out);
+  transition-delay: calc(var(--i) * 14ms);
+}
+.link-swap__track > span { display: block; height: 1.25em; line-height: 1.25em; }
+/* Guard: container rules such as `.some-list span { display: inline-flex;
+   min-height: 44px }` must never reach the letter parts, or the two stacked
+   copies render side by side ("AAllll"). */
+.link-swap .link-swap__letter { display: inline-block !important; min-height: 0 !important; height: 1.25em !important; }
+.link-swap .link-swap__track { display: block !important; min-height: 0 !important; }
+.link-swap .link-swap__track > span { display: block !important; min-height: 0 !important; }
+.link-swap.is-split::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.55rem;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-base);
+}
+.link-swap:is(:focus-visible, .is-pressed) .link-swap__track { transform: translateY(-1.25em); }
+.link-swap.is-split:is(:focus-visible, .is-pressed)::after { transform: scaleX(1); opacity: 1; }
+@media (hover: hover) {
+  .link-swap:hover .link-swap__track { transform: translateY(-1.25em); }
+  .link-swap.is-split:hover::after { transform: scaleX(1); opacity: 1; }
+}
+.link-swap .btn__icon { transition: transform var(--dur-base) var(--ease-out); }
+@media (hover: hover) { .link-swap:hover .btn__icon { transform: translateX(4px); } }
+
+
+/* ---------- 08 Arrow slide-and-loop (icon + carousel buttons) -------------- */
+.btn--arrow .btn__arrow { display: inline-flex; overflow: hidden; }
+.btn--arrow .btn__arrow svg { transition: none; }
+.btn--arrow:is(.is-pressed, :focus-visible) .btn__arrow svg { animation: arrow-loop 520ms var(--ease-in-out); }
+@media (hover: hover) { .btn--arrow:hover .btn__arrow svg { animation: arrow-loop 520ms var(--ease-in-out); } }
+.btn--arrow.btn--prev .btn__arrow svg { transform: scaleX(-1); }
+.btn--arrow.btn--prev:is(.is-pressed, :focus-visible) .btn__arrow svg { animation-name: arrow-loop-prev; }
+@media (hover: hover) { .btn--arrow.btn--prev:hover .btn__arrow svg { animation-name: arrow-loop-prev; } }
+@keyframes arrow-loop {
+  0% { transform: translateX(0); }
+  45% { transform: translateX(160%); }
+  46% { transform: translateX(-160%); }
+  100% { transform: translateX(0); }
+}
+@keyframes arrow-loop-prev {
+  0% { transform: scaleX(-1) translateX(0); }
+  45% { transform: scaleX(-1) translateX(160%); }
+  46% { transform: scaleX(-1) translateX(-160%); }
+  100% { transform: scaleX(-1) translateX(0); }
+}
+
+
+/* ---------- 09 Blob cursor (fine pointers only) ----------------------------
+   One element for the whole page, created by buttons.js. It stays hidden
+   until the pointer is over something with [data-cursor="Label"], then
+   swells and shows the label. mix-blend-mode: difference makes it invert
+   whatever is beneath: black on white, white on black, never a new colour. */
+.cursor-blob {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: var(--z-toast);
+  width: 5.5rem;
+  height: 5.5rem;
+  margin: -2.75rem 0 0 -2.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--chalk);
+  color: var(--ink);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(var(--cx, -100px), var(--cy, -100px), 0) scale(0.2);
+  transition: opacity var(--dur-base) var(--ease-out);
+  will-change: transform;
+}
+.cursor-blob.is-on { opacity: 1; }
+.cursor-blob__label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+[data-cursor] { cursor: pointer; }
+
+
+/* ---------- 10 Viscous liquid chips (filters) ------------------------------
+   Native radios inside labels (keyboard + screen reader for free). The bead
+   is one layer clipped to the selected chip; buttons.js animates the leading
+   edge faster than the trailing edge so it stretches like a drop of oil
+   between chips, then settles. Scrolls sideways on phones. */
+.chips {
+  position: relative;
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-0);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  isolation: isolate;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chips > legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.chips--wrap { flex-wrap: wrap; border: 0; padding: 0; overflow: visible; border-radius: 0; }
+
+.chip {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--fg-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: color var(--dur-base) var(--ease-out) 60ms, scale var(--dur-fast) var(--ease-out);
+}
+.chip > input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip:active { scale: 0.95; }
+@media (hover: hover) { .chip:hover { color: var(--fg); } }
+.chip:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--focus-halo);
+}
+.chip:has(input:disabled) { color: var(--fog); cursor: not-allowed; text-decoration: line-through; }
+
+.chips--liquid .chip:has(input:checked) { color: var(--inverse-fg); }
+/* No-JS / pre-JS: the checked chip gets its own fill so state is never lost. */
+.chips--liquid:not(.is-live) .chip:has(input:checked) { background: var(--inverse-bg); }
+.chips__bead {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--inverse-bg);
+  pointer-events: none;
+  clip-path: inset(var(--bt, 4px) var(--br, 100%) var(--bb, 4px) var(--bl, 0) round var(--radius-pill));
+  transition: clip-path var(--bead-dur, 520ms) var(--ease-out);
+}
+
+/* Toggle chip (multi-select, checkbox): ink floods from the centre. */
+.chip--toggle { border: 1px solid var(--line-strong); overflow: hidden; color: var(--fg); }
+.chip--toggle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--inverse-bg);
+  border-radius: inherit;
+  transform: scale(0.2);
+  opacity: 0;
+  transition: transform var(--dur-slow) var(--ease-spring), opacity var(--dur-fast) var(--ease-out);
+}
+.chip--toggle { isolation: isolate; }
+.chip--toggle:has(input:checked) { color: var(--inverse-fg); border-color: var(--inverse-bg); }
+.chip--toggle:has(input:checked)::before { transform: scale(1); opacity: 1; }
+.chip--toggle .chip__tick { width: 0.9em; height: 0.9em; margin-left: -0.2em; margin-right: 0.35em; display: none; }
+.chip--toggle:has(input:checked) .chip__tick { display: block; }
+
+
+/* ---------- Heart pop (wishlist) -------------------------------------------
+   aria-pressed is the state. Pop overshoots with the spring ease and a ring
+   of six ink droplets bursts once. */
+.btn-heart {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+  color: var(--fg);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+.btn-heart:active { scale: 0.9; }
+.btn-heart svg { width: 22px; height: 22px; overflow: visible; }
+.btn-heart path { fill: transparent; stroke: currentColor; stroke-width: 1.8; transition: fill var(--dur-fast) var(--ease-out); }
+.btn-heart[aria-pressed="true"] path { fill: currentColor; }
+.btn-heart[aria-pressed="true"] svg { animation: heart-pop 480ms var(--ease-spring); }
+.btn-heart::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin: -2px;
+  border-radius: 50%;
+  color: var(--fg);
+  box-shadow:
+    0 -18px 0 currentColor, 16px -9px 0 currentColor, 16px 9px 0 currentColor,
+    0 18px 0 currentColor, -16px 9px 0 currentColor, -16px -9px 0 currentColor;
+  opacity: 0;
+  transform: scale(0.3);
+  pointer-events: none;
+}
+.btn-heart.is-burst::after { animation: heart-burst 520ms var(--ease-out); }
+@keyframes heart-pop { 0% { transform: scale(0.6); } 55% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes heart-burst { 0% { opacity: 1; transform: scale(0.3); } 100% { opacity: 0; transform: scale(1.35); } }
+@media (hover: hover) { .btn-heart:hover { scale: 1.06; } }
+
+
+/* ---------- Shell-specific buttons ---------------------------------------- */
+/* Floating WhatsApp: a 56px white disc on black ground (inverts on light). */
+.btn--fab {
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  background: var(--chalk);
+  color: var(--ink);
+  border: 1px solid var(--ink-line);
+  box-shadow: var(--shadow-float);
+}
+.btn--fab svg { width: 1.75rem; height: 1.75rem; }
+
+
+/* ---------- Reduced motion -------------------------------------------------
+   No travel, no loops: states become instant tone swaps. Focus stays visible
+   (base.css). Gooey + wave layers are replaced by flat fills. */
+@media (prefers-reduced-motion: reduce) {
+  .btn, .chip, .btn-heart { scale: 1 !important; translate: none !important; }
+  .btn--gooey.is-goo { background: var(--inverse-bg); }
+  .btn__goo { display: none; }
+  .btn--liquid-fill::before { display: none; }
+  .btn--liquid-fill:is(:hover, .is-pressed, :focus-visible) { background: var(--fg); color: var(--bg); }
+  .btn--magnetic .btn__label { translate: none; }
+  .btn__ripple { display: none; }
+  .btn__dots i { animation: none; }
+  .btn--submit[data-state="error"] { animation: none; }
+  .trace-ring rect { animation: none !important; stroke-dasharray: none; }
+  .link-swap__track { transform: none !important; }
+  .link-swap.is-split { text-decoration: underline; }
+  .link-swap.is-split::after { display: none; }
+  .btn--arrow .btn__arrow svg { animation: none !important; }
+  .cursor-blob { display: none; }
+  .btn-heart svg, .btn-heart.is-burst::after { animation: none !important; }
+  .chip--toggle::before { transform: scale(1); }
+}
+
+/* Windows high contrast / forced colours: keep borders so shapes survive. */
+@media (forced-colors: active) {
+  .btn, .chip, .badge, .btn-heart { border: 1px solid ButtonText; }
+  .btn__goo, .btn--liquid-fill::before, .chips__bead { display: none; }
+}

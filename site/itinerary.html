@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- js/itinerary.js rewrites title, description and OG tags when ?trip= picks one trip -->
+  <title>Student group trips: day-by-day itineraries | Escape Cartel</title>
+  <meta name="description" content="Student group trips from Manipal University Jaipur. Read the full day-by-day itinerary with places, activities and stays, see the price and seats left, then join.">
+  <link rel="canonical" href="/itinerary">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Escape Cartel">
+  <meta property="og:title" content="Group trips, day by day | Escape Cartel">
+  <meta property="og:description" content="Every group trip with its full day-by-day plan, stays, inclusions and price per person.">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Snow-covered Himalayan ridges seen from Kedarkantha summit in Uttarakhand">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
+  <link rel="preload" href="vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/buttons.css">
+  <link rel="stylesheet" href="css/pages.css">
+  <link rel="stylesheet" href="css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+  <link rel="stylesheet" href="css/bg.css">
+  <link rel="stylesheet" href="css/trip-itinerary.css">
+  <link rel="stylesheet" href="css/itinerary.css">
+</head>
+<body data-no-bottombar>
+  <div data-include="header"></div>
+
+  <main id="main">
+    <!-- Legacy list markup is hidden; no trip ID redirects to /trips/. -->
+    <div id="it-list-view" hidden>
+      <section class="section page-head" data-theme="dark" aria-labelledby="page-title">
+        <div class="container">
+          <span class="page-head__ghost" aria-hidden="true">Groups</span>
+          <span class="eyebrow">Manipal University Jaipur · Student group trips</span>
+          <h1 id="page-title">Where student groups are going</h1>
+          <p class="lead">Open a trip to read every day, the stays and the price. You join from the end of the itinerary.</p>
+          <ul class="it-rules" aria-label="How joining works">
+            <li>Two pickup points: Sundar One hostel gate or College gate</li>
+            <li>Fixed budget per person, shown up front</li>
+            <li>Seats left update as students join</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section listing" data-theme="light" aria-label="Group trips">
+        <div class="container">
+          <form class="it-filters" id="it-filters" role="search" aria-label="Filter group trips">
+            <div class="it-filters__top">
+              <p class="filters__count" id="it-count" aria-live="polite"></p>
+              <div class="field it-sort">
+                <label for="it-sort">Sort by</label>
+                <select class="select" id="it-sort" name="sort">
+                  <option value="soonest">Soonest</option>
+                  <option value="budget">Lowest budget</option>
+                  <option value="filled">Most filled</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="it-filters__group">
+              <span class="field-label" id="it-dest-label">Destination</span>
+              <fieldset class="chips chips--wrap" id="it-dest" aria-labelledby="it-dest-label">
+                <legend>Destination</legend>
+                <label class="chip"><input type="radio" name="dest" value="" checked><span>All destinations</span></label>
+                <!-- destination chips are added by js/itinerary.js from the trips -->
+              </fieldset>
+            </div>
+
+            <div class="it-filters__group">
+              <span class="field-label" id="it-pickup-label">Pickup point</span>
+              <fieldset class="chips chips--wrap" id="it-pickup" aria-labelledby="it-pickup-label">
+                <legend>Pickup point</legend>
+                <label class="chip"><input type="radio" name="pickup" value="" checked><span>Any pickup</span></label>
+                <!-- the two pickup point chips are added by js/itinerary.js from data.js -->
+              </fieldset>
+            </div>
+          </form>
+
+          <p class="it-noscript" id="it-loading">Loading trips…</p>
+          <ul class="it-grid" id="it-grid" role="list" aria-label="Group trips" hidden></ul>
+
+          <div class="empty" id="it-empty" hidden>
+            <h2>No group trip matches that yet.</h2>
+            <p class="muted">Clear a filter, or tell us where your group wants to go and we plan a private trip.</p>
+            <div class="cluster">
+              <button class="btn btn--liquid-fill" type="button" id="it-reset"><span class="btn__label">Clear filters</span></button>
+              <a class="btn btn--primary" href="plan.html"><span class="btn__label">Plan my trip</span></a>
+            </div>
+          </div>
+
+          <p class="it-drop">Trips end with a drop back to your pickup area.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ DETAIL VIEW (?trip=): one trip, day by day, then Join ============ -->
+    <div id="it-detail-view" hidden>
+      <section class="ix-hero" data-theme="dark" id="ix-hero" aria-labelledby="ix-title">
+        <img class="ix-hero__img" id="ix-cover" alt="" width="1600" height="1000" fetchpriority="high" decoding="async">
+        <div class="container ix-hero__inner">
+          <a class="ix-back link-swap" href="/trips#group-trips">All group trips</a>
+          <p class="ix-hero__loc" id="ix-loc"></p>
+          <h1 id="ix-title">Loading trip…</h1>
+          <p class="lead ix-hero__lead" id="ix-summary"></p>
+          <dl class="ix-stats" id="ix-stats"></dl>
+          <div class="ix-hero__actions">
+            <a class="btn btn--primary btn--lg" href="#ix-days"><span class="btn__label">See the plan</span></a>
+          </div>
+        </div>
+      </section>
+
+      <nav class="ix-daynav" id="ix-daynav" aria-label="Jump to a day" data-theme="dark">
+        <div class="container">
+          <ol class="ix-daynav__list" id="ix-daynav-list" role="list"></ol>
+        </div>
+      </nav>
+
+      <!-- Day by day: story + key facts on the left, alternating timeline with small photos (css/trip-itinerary.css) -->
+      <section class="section tl" data-theme="dark" id="ix-days" aria-labelledby="ix-days-title">
+        <div class="container">
+          <div class="tl__head"><h2 class="tl__title" id="ix-days-title">About the trip</h2></div>
+          <div class="tl__grid">
+            <div class="tl__story">
+              <p id="ix-intro"></p>
+              <p class="tl__covers" id="ix-covers"></p>
+              <p>No need to worry about routes, stays or where to eat. Everything is planned, and your trip captain shows you where to go, so you can simply <span class="tl__enjoy">enjoy the escape</span>.</p>
+              <p class="tl__eyebrow">Key facts</p>
+              <dl class="tl__facts" id="ix-facts"></dl>
+            </div>
+            <div class="ix-route">
+              <span class="ix-route__fill" id="ix-rail-fill" aria-hidden="true"></span>
+              <ol class="tl__days" id="ix-timeline" role="list" aria-label="Day by day plan"></ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section ix-book" data-theme="dark" id="ix-book" aria-labelledby="ix-book-title">
+        <div class="container ix-book__grid">
+          <div class="ix-book__info">
+            <h2 id="ix-book-title">What your price covers</h2>
+            <ul class="ix-incl" id="ix-incl" role="list"></ul>
+            <h3 class="ix-book__sub">Where you stay</h3>
+            <ul class="ix-stays" id="ix-stays" role="list"></ul>
+          </div>
+
+          <aside class="ix-summary" aria-labelledby="ix-sum-title">
+            <h3 id="ix-sum-title" class="ix-summary__title">Price summary</h3>
+            <p class="ix-summary__price"><strong id="ix-sum-price"></strong><span>per person, full trip</span></p>
+            <dl class="ix-summary__list" id="ix-sum-list"></dl>
+            <div class="it-seats" id="ix-sum-seats"></div>
+            <div id="ix-join-slot"></div>
+            <p class="field-hint">You add your name, phone and pickup next. Payment is the last step.</p>
+          </aside>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ UNKNOWN ID ============ -->
+    <section class="section not-found ix-missing" id="it-missing" data-theme="dark" aria-labelledby="ix-missing-title" hidden>
+      <div class="container">
+        <h1 id="ix-missing-title">We could not find that trip.</h1>
+        <p class="lead">The link may be old, or the trip has finished. Every open group trip is listed on one page.</p>
+        <div class="cluster">
+          <a class="btn btn--primary btn--lg" href="/trips#group-trips"><span class="btn__label">See group trips</span></a>
+          <a class="btn btn--liquid-fill" href="plan.html"><span class="btn__label">Plan my trip</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--tight" data-theme="dark" id="it-cta" aria-labelledby="it-cta-title">
+      <div class="container cluster" style="justify-content:space-between;gap:var(--space-3)">
+        <div>
+          <h2 id="it-cta-title" class="h3">Travelling as your own group?</h2>
+          <p class="muted">Tell us the destination, dates, budget and group size. We plan a private trip around your crew.</p>
+        </div>
+        <div class="cluster">
+          <a class="btn btn--primary btn--lg" href="plan.html"><span class="btn__label">Plan my trip</span></a>
+          <a class="link-swap" data-wa href="https://wa.me/919825744110" target="_blank" rel="noopener">WhatsApp 98257 44110</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Mobile join bar: shows after the day plan, hides once the price summary is on screen -->
+  <div class="trip-bar ix-bar" id="ix-bar" role="region" aria-label="Join this trip" data-theme="dark" hidden>
+    <p class="ix-bar__price"><strong id="ix-bar-price"></strong><span>per person</span></p>
+    <div id="ix-bar-slot"></div>
+  </div>
+
+  <dialog class="lightbox" id="ix-lightbox" aria-label="Photo viewer" data-theme="dark">
+    <div class="lightbox__head">
+      <p class="lightbox__cap" id="ix-lb-cap"></p>
+      <button class="btn btn--icon btn--sm btn--ripple" type="button" data-close aria-label="Close photo viewer">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="lightbox__stage" id="ix-lb-stage"><img id="ix-lb-img" alt=""></div>
+    <div class="lightbox__foot">
+      <button class="btn btn--icon btn--arrow btn--prev" type="button" id="ix-lb-prev" aria-label="Previous photo"><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <span class="lightbox__count" id="ix-lb-count" aria-live="polite"></span>
+      <button class="btn btn--icon btn--arrow" type="button" id="ix-lb-next" aria-label="Next photo"><span class="btn__arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+    </div>
+  </dialog>
+
+  <dialog class="dialog it-dialog" id="it-join" aria-labelledby="it-join-title" data-theme="light">
+    <div class="dialog__head">
+      <h2 id="it-join-title">Join this trip</h2>
+      <button class="btn btn--icon btn--sm btn--ripple" type="button" data-close aria-label="Close join form">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <form class="dialog__body it-form" id="it-join-form" novalidate>
+      <p class="it-form__trip" id="it-join-summary"></p>
+      <p class="form-status field-error" id="it-join-status" role="alert"></p>
+
+      <div class="field">
+        <label for="it-name">Your name</label>
+        <input class="input" id="it-name" name="name" type="text" autocomplete="name" maxlength="60" required aria-describedby="it-name-err">
+        <p class="field-error" id="it-name-err"></p>
+      </div>
+
+      <div class="field">
+        <label for="it-phone">Mobile number</label>
+        <input class="input" id="it-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="14" required aria-describedby="it-phone-hint it-phone-err">
+        <p class="field-hint" id="it-phone-hint">10 digits. Used only for this trip.</p>
+        <p class="field-error" id="it-phone-err"></p>
+      </div>
+
+      <fieldset class="it-pickup" aria-describedby="it-pickup-err">
+        <legend class="field-label">Pickup point</legend>
+        <div class="it-pickup__opts" id="it-pickup-opts">
+          <!-- the two pickup points are added by js/itinerary.js from data.js -->
+        </div>
+        <p class="field-hint">Your trip ends with a drop back at this pickup point.</p>
+        <p class="field-error" id="it-pickup-err"></p>
+      </fieldset>
+
+      <div class="field">
+        <label class="it-check" for="it-budget">
+          <input id="it-budget" name="budget" type="checkbox" required aria-describedby="it-budget-err">
+          <span id="it-budget-label">I can pay the trip budget</span>
+        </label>
+        <p class="field-error" id="it-budget-err"></p>
+      </div>
+
+      <button class="btn btn--primary btn--lg btn--block" type="submit" id="it-join-submit"><span class="btn__label">Continue to payment</span></button>
+      <p class="field-hint">You pay at the last step, by QR or the demo gateway.</p>
+    </form>
+  </dialog>
+
+  <div data-include="footer"></div>
+
+  <script src="js/core.js" defer></script>
+  <script src="js/buttons.js" defer></script>
+  <script src="vendor/gsap/gsap.min.js" defer></script>
+  <script src="vendor/gsap/ScrollTrigger.min.js" defer></script>
+  <script type="module" src="js/itinerary.js"></script>
+  <script type="module" src="js/fx.js"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Trip creator (owner only) | Escape Cartel</title>
+  <meta name="description" content="Owner-only tool for creating group trips with photos and a day-by-day itinerary.">
+  <!-- Owner-only tool: not linked from the public site, never indexed. -->
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="same-origin">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/logo/favicon-32.png">
+  <link rel="preload" href="/vendor/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/vendor/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/buttons.css">
+  <link rel="stylesheet" href="/css/info.css">
+  <link rel="stylesheet" href="/css/create.css">
+  <!-- Same page-transition opt-in as every other page, so navigations never half-start a transition. -->
+  <link rel="stylesheet" href="/css/fx.css">
+  <script>/* A skipped page transition must not log an uncaught error. */['pageswap','pagereveal'].forEach(function(n){addEventListener(n,function(e){var v=e.viewTransition;if(v)[v.ready,v.finished,v.updateCallbackDone].forEach(function(p){if(p)p.catch(function(){});});});});</script>
+</head>
+<body class="owner-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="oc-bar">
+    <div class="container oc-bar__inner">
+      <a class="oc-bar__brand" href="/" aria-label="Escape Cartel home">
+        <img src="/assets/images/logo/logo-mark.png" alt="" width="40" height="40">
+        <span>Owner tools</span>
+      </a>
+      <nav class="oc-bar__nav" aria-label="Owner">
+        <a href="/admin/">Orders dashboard</a>
+        <a href="/trips#group-trips">See trips live</a>
+        <button type="button" class="oc-bar__logout" id="oc-logout" hidden>Log out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <!-- 1. Gate: nothing below is usable until the kit's owner session is confirmed. -->
+    <section class="oc-gate container" id="oc-gate" aria-live="polite">
+      <div class="oc-gate__card" id="oc-gate-checking">
+        <p class="eyebrow">Owner only</p>
+        <h1 class="h3">Checking your owner login…</h1>
+      </div>
+
+      <form class="oc-gate__card lead-form" id="oc-login" novalidate hidden aria-labelledby="oc-login-title">
+        <div>
+          <p class="eyebrow">Owner only</p>
+          <h1 class="h3" id="oc-login-title">Log in to create trips</h1>
+          <p class="muted">Use the same email and password as the orders dashboard.</p>
+        </div>
+        <div class="field">
+          <label for="oc-email">Email</label>
+          <input id="oc-email" name="email" type="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="oc-password">Password</label>
+          <input id="oc-password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn--primary btn--lg btn--block" type="submit"><span class="btn__label">Log in</span></button>
+        <p class="form-status" id="oc-login-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="oc-gate__card" id="oc-gate-off" hidden>
+        <p class="eyebrow">Owner only</p>
+        <h1 class="h3">The trip creator is locked</h1>
+        <p class="muted" id="oc-gate-off-text">The owner login is not set up on this server yet.</p>
+        <a class="btn btn--ghost" href="/"><span class="btn__label">Back to the website</span></a>
+      </div>
+    </section>
+
+    <!-- 2. Creator: shown only after the owner check passes. -->
+    <div class="oc-app" id="oc-app" hidden>
+      <section class="container oc-head">
+        <p class="eyebrow">Owner only · not visible to students</p>
+        <h1 id="oc-title">Create a group trip</h1>
+        <p class="lead">Students see the cover and summary first, then read every day before they can join. Fill in all four parts, then publish.</p>
+        <p class="oc-note"><strong>Heads-up:</strong> published trips are saved in this browser for now, so check them on this device. Online publishing for every student is the next step.</p>
+      </section>
+
+      <div class="container oc-layout">
+        <nav class="oc-rail" aria-label="Trip creator steps">
+          <ol>
+            <li><a href="#step-basics" data-step="basics"><span class="oc-rail__dot" aria-hidden="true"></span><span>Trip basics</span></a></li>
+            <li><a href="#step-cover" data-step="cover"><span class="oc-rail__dot" aria-hidden="true"></span><span>Cover &amp; summary</span></a></li>
+            <li><a href="#step-days" data-step="days"><span class="oc-rail__dot" aria-hidden="true"></span><span>Day by day</span></a></li>
+            <li><a href="#step-review" data-step="review"><span class="oc-rail__dot" aria-hidden="true"></span><span>Review &amp; publish</span></a></li>
+          </ol>
+        </nav>
+
+        <form class="oc-form" id="oc-form" novalidate aria-labelledby="oc-title">
+          <input type="hidden" name="id" id="oc-id">
+
+          <!-- Step 1 -->
+          <section class="oc-step" id="step-basics" aria-labelledby="step-basics-title">
+            <header class="oc-step__head">
+              <span class="oc-step__num" aria-hidden="true">1</span>
+              <div><h2 id="step-basics-title">Trip basics</h2><p class="muted">What students see on the trip card.</p></div>
+            </header>
+
+            <div class="field">
+              <label for="oc-trip-title">Trip name</label>
+              <input id="oc-trip-title" name="title" type="text" maxlength="80" required placeholder="e.g. Kedarkantha winter-break trek" aria-describedby="err-title">
+              <p class="field-error" id="err-title" data-error-for="title" hidden></p>
+            </div>
+
+            <div class="lead-form__row oc-row-2">
+              <div class="field">
+                <label for="oc-destination">Destination</label>
+                <input id="oc-destination" name="destination" type="text" maxlength="60" required list="oc-destinations" placeholder="e.g. Kedarkantha" aria-describedby="err-destination">
+                <datalist id="oc-destinations"></datalist>
+                <p class="field-error" id="err-destination" data-error-for="destination" hidden></p>
+              </div>
+              <div class="field">
+                <label for="oc-price">Price per person (₹)</label>
+                <input id="oc-price" name="price" type="number" inputmode="numeric" min="1" max="100000" step="1" required placeholder="e.g. 8499" aria-describedby="oc-price-hint err-price">
+                <span class="field__hint" id="oc-price-hint">Students confirm they can pay this full amount.</span>
+                <p class="field-error" id="err-price" data-error-for="price" hidden></p>
+              </div>
+            </div>
+
+            <div class="lead-form__row oc-row-2">
+              <div class="field">
+                <label for="oc-seats">Total seats</label>
+                <input id="oc-seats" name="seats" type="number" inputmode="numeric" min="2" max="30" step="1" required placeholder="e.g. 18" aria-describedby="oc-seats-hint err-seats">
+                <span class="field__hint" id="oc-seats-hint">2 to 30.</span>
+                <p class="field-error" id="err-seats" data-error-for="seats" hidden></p>
+              </div>
+              <fieldset class="field pickup" id="oc-pickup" aria-describedby="err-pickupPointId">
+                <legend class="field__label">Pickup and drop point</legend>
+                <div class="pickup__opts oc-pickup-opts" id="oc-pickup-opts"></div>
+                <p class="field-error" id="err-pickupPointId" data-error-for="pickupPointId" hidden></p>
+              </fieldset>
+            </div>
+
+            <fieldset class="field oc-dates" aria-describedby="oc-dates-hint err-dates">
+              <legend class="field__label">Departure dates</legend>
+              <span class="field__hint" id="oc-dates-hint">Add every date this trip runs (up to 6).</span>
+              <ul class="oc-dates__list" id="oc-dates-list"></ul>
+              <button type="button" class="oc-add" id="oc-add-date"><span aria-hidden="true">+</span> Add another date</button>
+              <p class="field-error" id="err-dates" data-error-for="dates" hidden></p>
+            </fieldset>
+          </section>
+
+          <!-- Step 2 -->
+          <section class="oc-step" id="step-cover" aria-labelledby="step-cover-title">
+            <header class="oc-step__head">
+              <span class="oc-step__num" aria-hidden="true">2</span>
+              <div><h2 id="step-cover-title">Cover &amp; summary</h2><p class="muted">The photo and two lines that make a student tap the card.</p></div>
+            </header>
+
+            <div class="field">
+              <span class="field__label" id="oc-cover-label">Cover photo</span>
+              <div class="oc-photo oc-photo--cover" data-photo="cover" data-max="1600"></div>
+              <p class="field-error" id="err-coverImage" data-error-for="coverImage" hidden></p>
+            </div>
+            <div class="field">
+              <label for="oc-cover-alt">Describe the cover photo <span class="field__opt">(for screen readers)</span></label>
+              <input id="oc-cover-alt" name="coverAlt" type="text" maxlength="160" placeholder="e.g. Trekkers on a snowy ridge at sunrise">
+            </div>
+
+            <div class="field">
+              <label for="oc-summary">Summary</label>
+              <textarea id="oc-summary" name="summary" maxlength="240" rows="3" required placeholder="e.g. Snow trails, pine-forest camps and a summit sunrise with a group from your own campus." aria-describedby="oc-summary-count err-summary"></textarea>
+              <span class="field__hint oc-count" id="oc-summary-count" aria-live="polite">0 / 240</span>
+              <p class="field-error" id="err-summary" data-error-for="summary" hidden></p>
+            </div>
+
+            <div class="field">
+              <label for="oc-inclusions">What's included <span class="field__opt">(one per line)</span></label>
+              <textarea id="oc-inclusions" name="inclusions" rows="4" placeholder="Return transport from the pickup point&#10;Trek leader and local guide&#10;Meals on the trek"></textarea>
+            </div>
+          </section>
+
+          <!-- Step 3 -->
+          <section class="oc-step oc-step--days" id="step-days" aria-labelledby="step-days-title">
+            <header class="oc-step__head">
+              <span class="oc-step__num" aria-hidden="true">3</span>
+              <div><h2 id="step-days-title">Day by day</h2><p class="muted">One card per day. Students read all of it before the Join button appears.</p></div>
+            </header>
+            <ol class="oc-spine" id="oc-days"></ol>
+            <button type="button" class="oc-add oc-add--day" id="oc-add-day"><span aria-hidden="true">+</span> Add day <span id="oc-next-day">1</span></button>
+            <p class="field-error" id="err-days" data-error-for="days" hidden></p>
+          </section>
+
+          <!-- Step 4 -->
+          <section class="oc-step" id="step-review" aria-labelledby="step-review-title">
+            <header class="oc-step__head">
+              <span class="oc-step__num" aria-hidden="true">4</span>
+              <div><h2 id="step-review-title">Review &amp; publish</h2><p class="muted">A quick check before students see it.</p></div>
+            </header>
+            <dl class="oc-review" id="oc-review"></dl>
+            <div class="form-status" id="oc-status" data-state="" role="status" aria-live="polite"></div>
+            <div class="oc-actions">
+              <button class="btn btn--primary btn--lg" type="submit" id="oc-submit"><span class="btn__label">Publish trip</span></button>
+              <button class="oc-link" type="button" id="oc-reset">Clear the form</button>
+            </div>
+          </section>
+        </form>
+      </div>
+
+      <!-- Success -->
+      <section class="container" aria-live="polite">
+        <div class="create-success" id="oc-success" tabindex="-1" hidden>
+          <span class="create-success__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+          <h2 class="h3" id="oc-success-title">Trip published</h2>
+          <p class="lead" id="oc-success-text"></p>
+          <div class="create-success__actions">
+            <a class="btn btn--primary btn--lg" href="/trips#group-trips" id="oc-success-link"><span class="btn__label">See it with the other trips</span></a>
+            <button class="btn btn--ghost btn--lg" type="button" id="oc-another"><span class="btn__label">Create another trip</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Published trips (this browser) -->
+      <section class="container oc-mine" aria-labelledby="oc-mine-title">
+        <h2 id="oc-mine-title" class="h3">Your published trips</h2>
+        <ul class="oc-mine__list" id="oc-mine-list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <!-- Day card template (cloned by js/create.js). data-k = field key inside the day. -->
+  <template id="oc-day-tpl">
+    <li class="oc-day">
+      <span class="oc-day__node" aria-hidden="true"></span>
+      <article class="oc-day__card">
+        <header class="oc-day__head">
+          <h3 class="oc-day__label">Day <span data-daynum>1</span></h3>
+          <button type="button" class="oc-day__remove" data-remove-day>Remove day<span class="sr-only" data-remove-sr></span></button>
+        </header>
+        <div class="oc-day__grid">
+          <div class="field oc-day__photo">
+            <span class="field__label">Day photo <span class="field__opt">(optional)</span></span>
+            <div class="oc-photo" data-photo="day" data-max="1600"></div>
+            <label class="oc-sub" data-for="imageAlt">Describe the photo</label>
+            <input type="text" data-k="imageAlt" maxlength="160" placeholder="e.g. Camp by a frozen lake">
+          </div>
+          <div class="oc-day__fields">
+            <div class="lead-form__row oc-row-2">
+              <div class="field">
+                <label data-for="title">Day title</label>
+                <input type="text" data-k="title" maxlength="80" required placeholder="e.g. Sankri to Juda-ka-Talab">
+                <p class="field-error" data-err="title" hidden></p>
+              </div>
+              <div class="field">
+                <label data-for="place">Place</label>
+                <input type="text" data-k="place" maxlength="60" required placeholder="e.g. Juda-ka-Talab">
+                <p class="field-error" data-err="place" hidden></p>
+              </div>
+            </div>
+            <div class="field">
+              <label data-for="description">What happens today <span class="field__opt">(optional)</span></label>
+              <textarea data-k="description" rows="3" maxlength="600" placeholder="e.g. Forest climb through pine and oak to a lake campsite."></textarea>
+            </div>
+            <div class="field">
+              <label data-for="activities">Activities <span class="field__opt">(one per line)</span></label>
+              <textarea data-k="activities" rows="3" required placeholder="Forest trail climb&#10;Camp set-up by the lake&#10;Stargazing"></textarea>
+              <p class="field-error" data-err="activities" hidden></p>
+            </div>
+            <div class="lead-form__row oc-row-2 oc-stay">
+              <div class="field">
+                <label data-for="hotelName">Overnight stay</label>
+                <input type="text" data-k="hotelName" maxlength="80" placeholder="Hotel: to be confirmed by Neel">
+                <span class="field__hint">Leave empty for travel days with no stay.</span>
+              </div>
+              <div class="field">
+                <label data-for="hotelNote">Stay note <span class="field__opt">(optional)</span></label>
+                <input type="text" data-k="hotelNote" maxlength="160" placeholder="e.g. Tents on twin sharing">
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </li>
+  </template>
+
+  <!-- Photo picker template (cloned into every [data-photo]). -->
+  <template id="oc-photo-tpl">
+    <input class="oc-photo__input sr-only" type="file" accept="image/jpeg,image/png,image/webp">
+    <label class="oc-photo__drop">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg>
+      <span class="oc-photo__cta">Choose a photo</span>
+      <span class="oc-photo__hint">or drop it here · JPG, PNG or WebP · resized to 1600 px</span>
+    </label>
+    <figure class="oc-photo__preview" hidden>
+      <img alt="" width="320" height="180">
+      <figcaption class="oc-photo__meta"></figcaption>
+      <div class="oc-photo__tools">
+        <button type="button" class="oc-photo__btn" data-photo-replace>Replace</button>
+        <button type="button" class="oc-photo__btn" data-photo-remove>Remove</button>
+      </div>
+    </figure>
+    <p class="oc-photo__busy" hidden>Resizing photo…</p>
+    <p class="field-error oc-photo__error" hidden></p>
+  </template>
+
+  <script type="module" src="/js/create.js"></script>
+</body>
+</html>
